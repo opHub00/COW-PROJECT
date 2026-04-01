@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CAGI — 단국대학교 컴퓨터그래픽 동아리</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<style>
+/* ── 리셋 & 변수 ──────────────────────────────── */
+:root {
+  --bg:#080A0F; --surface:#0D1117; --surface2:#161B24;
+  --border:rgba(255,255,255,0.07);
+  --accent:#00D4FF; --accent2:#7B61FF; --accent3:#FF6B6B;
+  --text:#E8EAF0; --muted:#6B7280;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;font-family:inherit}
+
+/* ── 공통 ────────────────────────────────────── */
+.section-label{font-family:'Space Grotesk',sans-serif;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:.8rem;display:flex;align-items:center;gap:.8rem}
+.section-label::before{content:'';display:block;width:24px;height:1px;background:var(--accent)}
+.gradient-line{width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--accent),var(--accent2),transparent);opacity:.3}
+.page{display:none;animation:fadeInUp .35s ease}
+.page.active{display:block}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-6px)}}
+
+/* ── 네비게이션 ──────────────────────────────── */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:1rem 2.5rem;background:rgba(8,10,15,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.15em;color:#fff;display:flex;align-items:center;gap:.6rem;cursor:pointer}
+.nav-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{color:var(--muted);font-size:.85rem;letter-spacing:.05em;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--white)}
+.nav-right{display:flex;gap:.5rem;align-items:center}
+.btn-ghost{padding:.45rem 1.1rem;border-radius:6px;border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:.82rem;transition:all .2s}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-accent{padding:.45rem 1.1rem;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:var(--bg);font-family:'Space Grotesk',sans-serif;font-size:.82rem;font-weight:600;transition:all .2s}
+.btn-accent:hover{background:transparent;color:var(--accent)}
+.admin-bar{position:fixed;top:0;left:0;right:0;z-index:1001;padding:.4rem 2rem;background:rgba(123,97,255,.12);border-bottom:1px solid rgba(123,97,255,.22);display:flex;align-items:center;justify-content:center;gap:.8rem;font-size:.75rem;color:rgba(123,97,255,.95);font-family:'Space Grotesk',sans-serif}
+.admin-dot{width:6px;height:6px;background:rgba(123,97,255,.9);border-radius:50%;animation:pulse 1.5s infinite}
+
+/* ── 히어로 ──────────────────────────────────── */
+#heroSection{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(0,212,255,.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(123,97,255,.08) 0%,transparent 60%),var(--bg)}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:60px 60px;-webkit-mask-image:radial-gradient(ellipse at center,black 40%,transparent 80%)}
+#heroCanvas{position:absolute;inset:0;pointer-events:none}
+.hero-content{position:relative;z-index:10;text-align:center;padding:2rem}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem 1rem;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:100px;font-family:'Space Grotesk',sans-serif;font-size:.75rem;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:1.5rem;animation:fadeInUp .8s ease both}
+.hero-badge .line{width:20px;height:1px;background:var(--accent)}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(5rem,16vw,12rem);line-height:.9;letter-spacing:.05em;color:#fff;animation:fadeInUp .8s .1s ease both}
+.hero-title .acc{color:var(--accent)}
+.hero-sub{font-family:'Space Grotesk',sans-serif;font-size:clamp(.9rem,2vw,1.1rem);color:var(--muted);letter-spacing:.3em;text-transform:uppercase;margin:1rem 0 2rem;animation:fadeInUp .8s .2s ease both}
+.hero-desc{font-size:1rem;color:rgba(232,234,240,.6);max-width:420px;margin:0 auto 2.5rem;line-height:1.9;animation:fadeInUp .8s .3s ease both}
+.hero-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;animation:fadeInUp .8s .4s ease both}
+.btn-primary{padding:.85rem 2rem;background:var(--accent);color:var(--bg);border:none;border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;letter-spacing:.05em;transition:all .2s;display:inline-block}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,212,255,.3)}
+.btn-outline{padding:.85rem 2rem;background:transparent;color:var(--text);border:1px solid var(--border);border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:.9rem;cursor:pointer;letter-spacing:.05em;transition:all .2s;display:inline-block}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.hero-stats{position:absolute;bottom:3rem;left:50%;transform:translateX(-50%);display:flex;gap:3rem;animation:fadeInUp .8s .6s ease both}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;color:#fff;letter-spacing:.05em;display:block}
+.stat-label{font-size:.72rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-family:'Space Grotesk',sans-serif}
+.scroll-hint{position:absolute;bottom:1.2rem;left:50%;font-size:.7rem;color:var(--muted);font-family:'Space Grotesk',sans-serif;letter-spacing:.15em;animation:bounce 2s infinite;text-align:center}
+
+/* ── 소개 섹션 ───────────────────────────────── */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+.about-img{aspect-ratio:4/3;background:var(--surface);border-radius:16px;border:1px solid var(--border);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:6rem;color:rgba(0,212,255,.08);letter-spacing:.1em}
+.about-badge{position:absolute;bottom:1.5rem;left:1.5rem;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.18);border-radius:8px;padding:.75rem 1rem}
+.pill{padding:.3rem .8rem;background:var(--surface2);border:1px solid var(--border);border-radius:100px;font-size:.78rem;color:var(--muted);font-family:'Space Grotesk',sans-serif;display:inline-block}
+.pill.hl{border-color:rgba(0,212,255,.3);color:var(--accent);background:rgba(0,212,255,.05)}
+
+/* ── 포트폴리오 ──────────────────────────────── */
+.p-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem;margin-top:2.5rem}
+.p-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .3s}
+.p-card:hover{border-color:rgba(0,212,255,.3);transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.p-thumb{aspect-ratio:16/9;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:.1em}
+.p-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(8,10,15,.9) 0%,transparent 60%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;justify-content:flex-end;padding:1rem}
+.p-card:hover .p-overlay{opacity:1}
+.p-tag{padding:.25rem .6rem;background:var(--accent);color:var(--bg);border-radius:4px;font-size:.7rem;font-family:'Space Grotesk',sans-serif;font-weight:600}
+.p-info{padding:1.2rem}
+.p-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;font-size:.72rem;color:var(--muted);font-family:'Space Grotesk',sans-serif}
+.p-title{font-size:.95rem;font-weight:500;color:#fff;margin-bottom:.5rem}
+.tool-badge{padding:.15rem .5rem;background:var(--surface2);border:1px solid var(--border);border-radius:4px;font-size:.68rem;color:var(--muted);font-family:'Space Grotesk',sans-serif}
+
+/* ── 스터디 ──────────────────────────────────── */
+.study-list{display:flex;flex-direction:column;gap:1rem;margin-top:2.5rem}
+.study-row{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.8rem 2rem;display:grid;grid-template-columns:auto 1fr auto;gap:1.5rem;align-items:center;cursor:pointer;transition:all .2s}
+.study-row:hover{border-color:rgba(0,212,255,.2);transform:translateX(4px)}
+.study-icon{width:52px;height:52px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+.study-status{padding:.2rem .7rem;border-radius:100px;font-size:.7rem;font-family:'Space Grotesk',sans-serif;font-weight:500}
+.status-open{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2)}
+.status-closed{background:rgba(255,107,107,.1);color:var(--accent3);border:1px solid rgba(255,107,107,.2)}
+.progress-bar{width:100%;height:3px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-top:.5rem}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .5s}
+
+/* ── 모달 ────────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1.5rem;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;transform:scale(.96) translateY(10px);transition:transform .25s}
+.modal-overlay.open .modal{transform:scale(1) translateY(0)}
+.modal-header{padding:1.8rem 2rem 0;display:flex;justify-content:space-between;align-items:flex-start}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#fff;letter-spacing:.05em}
+.modal-close{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:.2rem;transition:color .2s}
+.modal-close:hover{color:#fff}
+.modal-body{padding:1.5rem 2rem 2rem}
+.modal-tabs{display:flex;gap:1rem;border-bottom:1px solid var(--border);margin-bottom:1.5rem}
+.m-tab{background:none;border:none;padding:.5rem 0 .75rem;color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:.88rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s}
+.m-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.form-group{margin-bottom:1.1rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+label.fl{display:block;font-size:.73rem;color:var(--muted);margin-bottom:.35rem;letter-spacing:.06em;font-family:'Space Grotesk',sans-serif}
+input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.65rem .9rem;color:var(--text);font-size:.88rem;font-family:'Noto Sans KR',sans-serif;transition:border-color .2s;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+select{appearance:none;cursor:pointer}
+select option{background:var(--surface2)}
+textarea{resize:vertical;min-height:80px}
+.radio-group{display:flex;gap:.7rem;flex-wrap:wrap}
+.radio-label{display:flex;align-items:center;justify-content:center;gap:.4rem;cursor:pointer;padding:.5rem .9rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;font-size:.85rem;color:var(--text);transition:all .15s;flex:1}
+.radio-label.selected{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.05)}
+.radio-label input{display:none}
+.form-btn{width:100%;padding:.9rem;background:var(--accent);color:var(--bg);border:none;border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.05em}
+.form-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,212,255,.3)}
+.agree-label{display:flex;align-items:flex-start;gap:.5rem;cursor:pointer;font-size:.78rem;color:var(--muted);margin-top:.5rem}
+.agree-label a{color:var(--accent)}
+.agree-label input{width:auto;margin-top:2px;accent-color:var(--accent)}
+
+/* ── 포트폴리오 상세 모달 ─────────────────────── */
+.detail-modal{max-width:660px}
+.detail-img{width:100%;aspect-ratio:16/9;background:var(--surface2);border-radius:12px 12px 0 0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:5rem;letter-spacing:.1em;position:relative}
+.detail-body{padding:2rem}
+.detail-author{display:flex;align-items:center;gap:.8rem;padding:1rem;background:var(--surface2);border-radius:10px;margin-bottom:1.2rem}
+.detail-avatar{width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--bg);font-size:1rem;flex-shrink:0}
+.like-btn{display:flex;align-items:center;gap:.4rem;padding:.55rem 1.1rem;background:var(--surface);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--muted);cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:.85rem;transition:all .2s}
+.like-btn.liked{background:rgba(255,107,107,.15);border-color:rgba(255,107,107,.4);color:#ff6b6b}
+
+/* ── 스터디 상세 모달 ────────────────────────── */
+.study-detail-modal{max-width:520px}
+.sd-header{padding:2rem;background:var(--surface2);border-radius:16px 16px 0 0;border-bottom:1px solid var(--border)}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin:1.5rem 0}
+.detail-item{background:var(--surface2);border-radius:8px;padding:.75rem 1rem}
+.detail-item label.fl{text-transform:uppercase;letter-spacing:.1em;margin-bottom:.2rem}
+.detail-item span{font-size:.9rem;color:#fff}
+
+/* ── 관리자 패널 ──────────────────────────────── */
+.admin-layout{display:grid;grid-template-columns:220px 1fr;gap:2rem;margin-top:2rem}
+.admin-nav{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem;height:fit-content}
+.admin-nav-btn{display:block;width:100%;text-align:left;padding:.7rem 1rem;border-radius:8px;border:none;background:transparent;color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:.85rem;cursor:pointer;margin-bottom:.25rem;border-left:2px solid transparent;transition:all .15s}
+.admin-nav-btn.active{background:rgba(0,212,255,.1);color:var(--accent);border-left-color:var(--accent)}
+.admin-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;display:flex;align-items:center;gap:1rem}
+.stat-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
+.admin-tab-content{display:none}
+.admin-tab-content.active{display:block;animation:fadeInUp .3s ease}
+.members-table{width:100%;border-collapse:collapse}
+.members-table th{padding:.8rem 1rem;text-align:left;font-size:.72rem;color:var(--muted);font-family:'Space Grotesk',sans-serif;letter-spacing:.08em;text-transform:uppercase;font-weight:500;background:var(--surface2);border-bottom:1px solid var(--border)}
+.members-table td{padding:.85rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);font-size:.85rem}
+.badge{padding:.15rem .5rem;border-radius:100px;font-size:.68rem;font-family:'Space Grotesk',sans-serif}
+
+/* ── 프로필 페이지 ────────────────────────────── */
+.profile-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;text-align:center}
+.avatar-wrap{width:80px;height:80px;border-radius:50%;overflow:hidden;cursor:pointer;border:2px solid rgba(0,212,255,.3);margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;background:var(--accent);font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--bg)}
+
+/* ── 포트폴리오 업로드 ────────────────────────── */
+.upload-dropzone{width:100%;aspect-ratio:16/9;background:var(--surface2);border:2px dashed rgba(255,255,255,.15);border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;color:var(--muted);font-size:.85rem;transition:border-color .2s}
+.upload-dropzone:hover{border-color:rgba(0,212,255,.35)}
+.filter-btn{padding:.35rem .9rem;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:100px;font-size:.78rem;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:all .2s}
+.filter-btn.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+
+/* ── 토스트 ──────────────────────────────────── */
+.toast{position:fixed;bottom:2rem;right:2rem;z-index:9999;padding:1rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:.85rem;color:var(--text);display:flex;align-items:center;gap:.7rem;transform:translateY(80px);opacity:0;transition:all .3s;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:rgba(0,212,255,.3)}
+.toast.error{border-color:rgba(255,107,107,.3)}
+
+/* ── 반응형 ──────────────────────────────────── */
+.main-wrap{max-width:1200px;margin:0 auto;padding:0 2.5rem}
+.section-wrap{padding:6rem 0}
+@media(max-width:768px){
+  nav{padding:1rem 1.2rem}
+  .nav-links{display:none}
+  .about-grid{grid-template-columns:1fr}
+  .study-row{grid-template-columns:auto 1fr}
+  .admin-layout{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- 어드민 배너 -->
+<div class="admin-bar" id="adminBar" style="display:none">
+  <span class="admin-dot"></span>
+  관리자 모드 접속 중
+  <a onclick="showPage('admin')" style="color:rgba(123,97,255,.95);font-weight:600;cursor:pointer;margin-left:.4rem">관리자 패널 →</a>
+</div>
+
+<!-- 네비게이션 -->
+<nav id="mainNav">
+  <div class="nav-logo" onclick="showPage('home')">
+    <span class="nav-dot"></span>CAGI
+  </div>
+  <ul class="nav-links">
+    <li><a onclick="showPage('home');scrollTo('#about')">동아리 소개</a></li>
+    <li><a onclick="showPage('portfolio')">포트폴리오</a></li>
+    <li><a onclick="showPage('studies')">스터디</a></li>
+  </ul>
+  <div class="nav-right" id="navRight">
+    <button class="btn-ghost" onclick="openModal('auth','login')">로그인</button>
+    <button class="btn-accent" onclick="openModal('auth','signup')">회원가입</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     PAGE: HOME
+═══════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+
+  <!-- 히어로 -->
+  <section id="heroSection">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <canvas id="heroCanvas"></canvas>
+    <div class="hero-content">
+      <div class="hero-badge"><span class="line"></span>Since 1991 · 단국대학교 중앙동아리<span class="line"></span></div>
+      <h1 class="hero-title">C<span class="acc">A</span>GI</h1>
+      <p class="hero-sub">Computer Art &amp; Graphic Institute</p>
+      <p class="hero-desc">단국대학교 유일무이 컴퓨터그래픽 동아리.<br/>Blender, Unity, 프로그래밍으로 창의성을 현실로.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="showPage('portfolio')">포트폴리오 보기</button>
+        <button class="btn-outline" onclick="openModal('auth','signup')">동아리 가입하기</button>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div style="text-align:center"><span class="stat-num" data-count="33">0</span><span class="stat-label">Years</span></div>
+      <div style="text-align:center"><span class="stat-num" data-count="500">0</span><span class="stat-label">Alumni</span></div>
+      <div style="text-align:center"><span class="stat-num" data-count="120">0</span><span class="stat-label">Projects</span></div>
+    </div>
+    <div class="scroll-hint">SCROLL ↓</div>
+  </section>
+
+  <div class="gradient-line"></div>
+
+  <!-- 소개 -->
+  <div id="about" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+    <div class="main-wrap section-wrap">
+      <div class="about-grid">
+        <div class="about-img">CAGI
+          <div class="about-badge">
+            <div style="font-size:.65rem;color:var(--accent);letter-spacing:.15em;text-transform:uppercase">Founded · 1991</div>
+            <div style="font-size:.9rem;color:#fff;font-weight:600">단국대학교 중앙동아리</div>
+          </div>
+        </div>
+        <div>
+          <p class="section-label">About CAGI</p>
+          <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,5vw,3.8rem);line-height:1;color:#fff;margin-bottom:.5rem">창의성의<br>무한한 가능성</h2>
+          <p style="color:var(--muted);line-height:1.9;margin:1rem 0 1.5rem">1991년에 창설되어 30년 넘게 이어져 온 단국대학교 유일무이의 컴퓨터그래픽 동아리입니다. Blender 3D, Unity 게임 엔진, 프로그래밍 등 다양한 분야의 스터디를 통해 서로의 성장을 이끌어가고 있습니다.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:.5rem">
+            <span class="pill hl">Blender 3D</span><span class="pill hl">Unity</span><span class="pill hl">프로그래밍</span>
+            <span class="pill">게임 개발</span><span class="pill">모션 그래픽</span><span class="pill">디지털 아트</span><span class="pill">VR/AR</span><span class="pill">쉐이더</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gradient-line"></div>
+
+  <!-- 포트폴리오 미리보기 -->
+  <div class="main-wrap section-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:2.5rem">
+      <div>
+        <p class="section-label">Portfolio</p>
+        <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,5vw,3.5rem);color:#fff;line-height:1">작품 갤러리</h2>
+      </div>
+      <button class="btn-outline" onclick="showPage('portfolio')">전체 보기 →</button>
+    </div>
+    <div class="p-grid" id="homePortfolioGrid"></div>
+  </div>
+
+  <div class="gradient-line"></div>
+
+  <!-- 스터디 미리보기 -->
+  <div class="main-wrap section-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:2.5rem">
+      <div>
+        <p class="section-label">Studies</p>
+        <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,5vw,3.5rem);color:#fff;line-height:1">스터디 모집</h2>
+      </div>
+      <button class="btn-outline" onclick="showPage('studies')">전체 보기 →</button>
+    </div>
+    <div class="study-list" id="homeStudyList"></div>
+  </div>
+
+  <!-- 푸터 -->
+  <footer style="background:var(--surface);border-top:1px solid var(--border);padding:3rem 2.5rem;text-align:center">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.15em;color:#fff;margin-bottom:.5rem">CAGI</div>
+    <div style="font-size:.8rem;color:var(--muted);font-family:'Space Grotesk',sans-serif;letter-spacing:.08em">Computer Art &amp; Graphic Institute · 단국대학교</div>
+    <div style="display:flex;gap:2rem;justify-content:center;margin:1.5rem 0;flex-wrap:wrap">
+      <a style="color:var(--muted);font-size:.8rem;font-family:'Space Grotesk',sans-serif;cursor:pointer">소개</a>
+      <a onclick="showPage('portfolio')" style="color:var(--muted);font-size:.8rem;font-family:'Space Grotesk',sans-serif;cursor:pointer">포트폴리오</a>
+      <a onclick="showPage('studies')" style="color:var(--muted);font-size:.8rem;font-family:'Space Grotesk',sans-serif;cursor:pointer">스터디</a>
+      <a style="color:var(--muted);font-size:.8rem;font-family:'Space Grotesk',sans-serif;cursor:pointer">개인정보처리방침</a>
+    </div>
+    <div style="font-size:.72rem;color:rgba(107,114,128,.5);font-family:'Space Grotesk',sans-serif">© 2024 CAGI. All rights reserved. Est. 1991.</div>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE: PORTFOLIO
+═══════════════════════════════════════════ -->
+<div class="page" id="page-portfolio" style="padding-top:5.5rem;min-height:100vh">
+  <div class="main-wrap" style="padding-top:2rem;padding-bottom:4rem">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:2rem">
+      <div>
+        <p class="section-label">Portfolio</p>
+        <h1 style="font-family:'Bebas Neue',sans-serif;font-size:3.5rem;color:#fff;line-height:1">작품 갤러리</h1>
+        <p style="color:var(--muted);margin-top:.4rem;font-size:.9rem">CAGI 멤버들의 창의적인 작품을 감상하세요</p>
+      </div>
+      <button class="btn-accent" id="uploadBtn" onclick="requireLogin('upload')" style="display:none">+ 작품 올리기</button>
+    </div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2rem" id="portfolioFilters">
+      <button class="filter-btn active" onclick="filterP('전체',this)">전체</button>
+      <button class="filter-btn" onclick="filterP('3D',this)">3D</button>
+      <button class="filter-btn" onclick="filterP('게임',this)">게임</button>
+      <button class="filter-btn" onclick="filterP('프로그래밍',this)">프로그래밍</button>
+      <button class="filter-btn" onclick="filterP('그래픽디자인',this)">그래픽디자인</button>
+    </div>
+    <div class="p-grid" id="portfolioGrid"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE: STUDIES
+═══════════════════════════════════════════ -->
+<div class="page" id="page-studies" style="padding-top:5.5rem;min-height:100vh">
+  <div class="main-wrap" style="padding-top:2rem;padding-bottom:4rem;max-width:900px">
+    <p class="section-label">Studies</p>
+    <h1 style="font-family:'Bebas Neue',sans-serif;font-size:3.5rem;color:#fff;line-height:1;margin-bottom:.5rem">스터디 모집</h1>
+    <p style="color:var(--muted);font-size:.95rem;margin-bottom:2.5rem">현재 모집 중인 스터디에 신청해보세요. 신청자 명단은 관리자만 확인할 수 있습니다.</p>
+    <div class="study-list" id="studyListFull"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE: PROFILE
+═══════════════════════════════════════════ -->
+<div class="page" id="page-profile" style="padding-top:5.5rem;min-height:100vh">
+  <div class="main-wrap" style="padding-top:2rem;padding-bottom:4rem;max-width:900px">
+    <p class="section-label">My Page</p>
+    <h1 style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:#fff;line-height:1;margin-bottom:2rem">프로필</h1>
+    <div style="display:grid;grid-template-columns:1fr 1.8fr;gap:2rem;align-items:start">
+      <div class="profile-card">
+        <div class="avatar-wrap">H</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:600;color:#fff;margin-bottom:.2rem">홍길동</div>
+        <div style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">컴퓨터공학과 2학년 · 32200001</div>
+        <div style="display:flex;flex-direction:column;gap:.4rem;font-size:.78rem;color:var(--muted)">
+          <div>🎂 2002.03.15 · 22세</div>
+          <div>📊 재학생</div>
+          <div id="profileRoleBadge">🛡 일반 회원</div>
+        </div>
+        <div style="margin-top:1.5rem;padding:.8rem;background:rgba(0,212,255,.05);border-radius:8px;border:1px solid rgba(0,212,255,.1)">
+          <div style="font-size:.72rem;color:var(--accent);letter-spacing:.1em;font-family:'Space Grotesk',sans-serif;margin-bottom:.3rem">ACTIVITY</div>
+          <div style="display:flex;justify-content:space-around">
+            <div style="text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:#fff">3</div><div style="font-size:.65rem;color:var(--muted)">작품</div></div>
+            <div style="text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:#fff">2</div><div style="font-size:.65rem;color:var(--muted)">스터디</div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="admin-card" style="margin-bottom:1.5rem">
+          <h3 style="font-size:1rem;color:#fff;margin-bottom:1.2rem">기본 정보 수정</h3>
+          <div class="form-group"><label class="fl">이름</label><input value="홍길동"/></div>
+          <div class="form-group"><label class="fl">전공</label><input value="컴퓨터공학과"/></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1.2rem">
+            <div class="form-group"><label class="fl">학년</label><select><option>2학년</option><option>1학년</option><option>3학년</option><option>4학년</option></select></div>
+            <div class="form-group"><label class="fl">상태</label><select><option>재학생</option><option>졸업생</option></select></div>
+          </div>
+          <div class="form-group"><label class="fl">자기소개</label><textarea placeholder="간단한 자기소개"></textarea></div>
+          <button class="form-btn" onclick="toast('프로필이 저장되었습니다!','success')">변경사항 저장</button>
+        </div>
+        <div class="admin-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+            <h3 style="font-size:1rem;color:#fff">내 작품</h3>
+            <button onclick="showPage('upload')" style="padding:.3rem .7rem;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);border-radius:6px;color:var(--accent);font-size:.75rem;cursor:pointer;font-family:'Space Grotesk',sans-serif">+ 추가</button>
+          </div>
+          <div id="myPortfolioList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE: UPLOAD
+═══════════════════════════════════════════ -->
+<div class="page" id="page-upload" style="padding-top:5.5rem;min-height:100vh">
+  <div class="main-wrap" style="padding-top:2rem;padding-bottom:4rem;max-width:720px">
+    <p class="section-label">Upload</p>
+    <h1 style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:#fff;line-height:1;margin-bottom:2rem">작품 올리기</h1>
+    <div class="upload-dropzone" id="thumbDropzone" onclick="document.getElementById('thumbInput').click()">
+      <div style="font-size:2rem">📷</div>
+      <div>클릭하여 대표 이미지 업로드</div>
+      <div style="font-size:.75rem;color:rgba(107,114,128,.6)">PNG, JPG, WebP (최대 10MB)</div>
+    </div>
+    <input type="file" id="thumbInput" accept="image/*" style="display:none" onchange="previewThumb(this)"/>
+    <div style="margin-top:1.5rem">
+      <div class="form-group"><label class="fl">제목 *</label><input id="uploadTitle" placeholder="작품 제목을 입력해주세요"/></div>
+      <div class="form-group"><label class="fl">설명</label><textarea id="uploadDesc" placeholder="작품에 대한 설명을 적어주세요" style="min-height:100px"></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1.2rem">
+        <div class="form-group"><label class="fl">카테고리 *</label><select id="uploadCat"><option value="">선택</option><option>3D</option><option>게임</option><option>프로그래밍</option><option>그래픽디자인</option><option>영상</option><option>기타</option></select></div>
+        <div class="form-group"><label class="fl">사용 툴</label><input id="uploadTools" placeholder="Blender, Unity"/></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:1.5rem;cursor:pointer" onclick="this.querySelector('input').click()">
+        <input type="checkbox" checked style="accent-color:var(--accent);width:auto;transform:scale(1.2)"/>
+        <div><div style="font-size:.9rem;color:#fff">공개 포트폴리오</div><div style="font-size:.75rem;color:var(--muted)">비공개 시 본인만 볼 수 있습니다</div></div>
+      </div>
+      <button class="form-btn" onclick="submitUpload()">포트폴리오 등록하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE: ADMIN
+═══════════════════════════════════════════ -->
+<div class="page" id="page-admin" style="padding-top:5.5rem;min-height:100vh">
+  <div class="main-wrap" style="padding-top:2rem;padding-bottom:4rem">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0">
+      <div><p class="section-label">Admin Panel</p><h1 style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:#fff;line-height:1">관리자 패널</h1><p style="color:var(--muted);font-size:.85rem;margin-top:.3rem">안녕하세요, 홍길동님 · 관리자</p></div>
+      <span style="padding:.5rem 1rem;background:rgba(123,97,255,.1);border:1px solid rgba(123,97,255,.2);border-radius:8px;font-size:.75rem;color:rgba(123,97,255,.9);font-family:'Space Grotesk',sans-serif">🛡 Admin</span>
+    </div>
+    <div class="admin-layout">
+      <nav class="admin-nav">
+        <button class="admin-nav-btn active" onclick="switchAdminTab('dashboard',this)">📊 대시보드</button>
+        <button class="admin-nav-btn" onclick="switchAdminTab('hero',this)">🎬 메인 화면 설정</button>
+        <button class="admin-nav-btn" onclick="switchAdminTab('studies-mgr',this)">📚 스터디 관리</button>
+        <button class="admin-nav-btn" onclick="switchAdminTab('members',this)">👥 회원 관리</button>
+        <button class="admin-nav-btn" onclick="switchAdminTab('portfolios-mgr',this)">🎨 포트폴리오 관리</button>
+        <button class="admin-nav-btn" onclick="switchAdminTab('transfer',this)">🔑 관리자 권한 양도</button>
+      </nav>
+      <div>
+        <!-- 대시보드 -->
+        <div class="admin-tab-content active" id="admin-dashboard">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem">
+            <div class="stat-card"><div class="stat-icon" style="background:rgba(0,212,255,.12);border:1px solid rgba(0,212,255,.2)">👥</div><div><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:#fff;line-height:1">47</div><div style="font-size:.8rem;color:var(--muted);font-family:'Space Grotesk',sans-serif">전체 회원</div></div></div>
+            <div class="stat-card"><div class="stat-icon" style="background:rgba(123,97,255,.12);border:1px solid rgba(123,97,255,.2)">🎨</div><div><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:#fff;line-height:1">23</div><div style="font-size:.8rem;color:var(--muted);font-family:'Space Grotesk',sans-serif">포트폴리오</div></div></div>
+            <div class="stat-card"><div class="stat-icon" style="background:rgba(76,175,80,.12);border:1px solid rgba(76,175,80,.2)">📚</div><div><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:#fff;line-height:1">4</div><div style="font-size:.8rem;color:var(--muted);font-family:'Space Grotesk',sans-serif">활성 스터디</div></div></div>
+            <div class="stat-card"><div class="stat-icon" style="background:rgba(255,152,0,.12);border:1px solid rgba(255,152,0,.2)">⏳</div><div><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:#fff;line-height:1">8</div><div style="font-size:.8rem;color:var(--muted);font-family:'Space Grotesk',sans-serif">대기 중 신청</div></div></div>
+          </div>
+          <div class="admin-card">
+            <h3 style="font-size:1rem;color:#fff;margin-bottom:1rem">운영 체크리스트</h3>
+            <label style="display:flex;align-items:center;gap:.7rem;cursor:pointer;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.85rem;color:var(--muted)"><input type="checkbox" style="accent-color:var(--accent);width:auto"/> 도메인 만료일 확인 (cagi.kr · 2025.11.30)</label>
+            <label style="display:flex;align-items:center;gap:.7rem;cursor:pointer;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.85rem;color:var(--muted)"><input type="checkbox" style="accent-color:var(--accent);width:auto"/> 졸업예정자 계정 상태 업데이트</label>
+            <label style="display:flex;align-items:center;gap:.7rem;cursor:pointer;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.85rem;color:var(--muted)"><input type="checkbox" checked style="accent-color:var(--accent);width:auto"/> 종료된 스터디 처리</label>
+            <label style="display:flex;align-items:center;gap:.7rem;cursor:pointer;padding:.5rem 0;font-size:.85rem;color:var(--muted)"><input type="checkbox" style="accent-color:var(--accent);width:auto"/> Supabase Storage 용량 확인</label>
+          </div>
+        </div>
+        <!-- 히어로 설정 -->
+        <div class="admin-tab-content" id="admin-hero">
+          <div class="admin-card">
+            <h2 style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#fff;margin-bottom:1rem">메인 화면 설정</h2>
+            <p style="font-size:.85rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.7">방문자가 처음 보는 히어로 화면을 설정합니다. 코딩 없이 배경 영상/이미지를 바꿀 수 있습니다.</p>
+            <div class="form-group"><label class="fl">배경 타입</label>
+              <div style="display:flex;gap:.6rem">
+                <button onclick="selectHeroType(this,'gradient')" class="filter-btn active" style="flex:1">🌈 그라디언트</button>
+                <button onclick="selectHeroType(this,'image')" class="filter-btn" style="flex:1">🖼 이미지</button>
+                <button onclick="selectHeroType(this,'video')" class="filter-btn" style="flex:1">🎬 영상</button>
+              </div>
+            </div>
+            <div class="form-group" id="heroFileGroup" style="display:none"><label class="fl">파일 업로드</label>
+              <div class="upload-dropzone" style="aspect-ratio:unset;padding:2rem" onclick="document.getElementById('heroFile').click()">클릭하여 파일 선택</div>
+              <input type="file" id="heroFile" style="display:none"/>
+            </div>
+            <div class="form-group"><label class="fl">어두운 오버레이 (<span id="opacityVal">50</span>%)</label>
+              <input type="range" min="0" max="100" value="50" oninput="document.getElementById('opacityVal').textContent=this.value" style="width:100%;accent-color:var(--accent)"/>
+              <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);font-family:'Space Grotesk',sans-serif;margin-top:.25rem"><span>밝음</span><span>어두움</span></div>
+            </div>
+            <button class="form-btn" onclick="toast('메인 화면 설정이 저장되었습니다!','success')">설정 저장하기</button>
+          </div>
+        </div>
+        <!-- 스터디 관리 -->
+        <div class="admin-tab-content" id="admin-studies-mgr">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+            <h2 style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#fff">스터디 관리</h2>
+            <button onclick="toggleCreateStudy()" class="btn-accent" style="padding:.5rem 1rem;font-size:.85rem">+ 새 스터디</button>
+          </div>
+          <div id="createStudyForm" style="display:none;margin-bottom:1.5rem">
+            <div class="admin-card">
+              <h3 style="font-size:1rem;color:#fff;margin-bottom:1.2rem">새 스터디 생성</h3>
+              <div class="form-group"><label class="fl">제목</label><input placeholder="스터디 제목"/></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+                <div class="form-group"><label class="fl">카테고리</label><select><option>Blender</option><option>Unity</option><option>프로그래밍</option><option>디자인</option><option>기타</option></select></div>
+                <div class="form-group"><label class="fl">최대 인원</label><input type="number" value="10"/></div>
+                <div class="form-group"><label class="fl">일정</label><input placeholder="매주 화요일 18:00"/></div>
+                <div class="form-group"><label class="fl">장소</label><input placeholder="공학관 301호"/></div>
+                <div class="form-group"><label class="fl">기간</label><input placeholder="8주"/></div>
+                <div class="form-group"><label class="fl">신청 마감</label><input type="datetime-local"/></div>
+              </div>
+              <div class="form-group"><label class="fl">설명</label><textarea placeholder="스터디 설명"></textarea></div>
+              <button class="form-btn" onclick="toast('스터디가 생성되었습니다!','success');toggleCreateStudy()">스터디 생성</button>
+            </div>
+          </div>
+          <div id="adminStudyList"></div>
+        </div>
+        <!-- 회원 관리 -->
+        <div class="admin-tab-content" id="admin-members">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+            <h2 style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#fff">회원 관리</h2>
+            <div style="display:flex;gap:.4rem">
+              <button class="filter-btn active" onclick="filterMembers('all',this)">전체</button>
+              <button class="filter-btn" onclick="filterMembers('재학생',this)">재학생</button>
+              <button class="filter-btn" onclick="filterMembers('졸업생',this)">졸업생</button>
+            </div>
+          </div>
+          <div class="admin-card" style="padding:0;overflow:hidden">
+            <table class="members-table" id="membersTable">
+              <thead><tr><th>이름</th><th>학번</th><th>전공</th><th>학년</th><th>상태</th><th>권한</th></tr></thead>
+              <tbody id="membersTbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <!-- 포트폴리오 관리 -->
+        <div class="admin-tab-content" id="admin-portfolios-mgr">
+          <h2 style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#fff;margin-bottom:1.5rem">포트폴리오 관리</h2>
+          <div class="admin-card" id="adminPortfolioList"></div>
+        </div>
+        <!-- 권한 양도 -->
+        <div class="admin-tab-content" id="admin-transfer">
+          <h2 style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#fff;margin-bottom:1.5rem">관리자 권한 양도</h2>
+          <div class="admin-card">
+            <div style="padding:1rem;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.2);border-radius:8px;margin-bottom:1.5rem">
+              <div style="font-size:.85rem;color:var(--accent3);font-weight:500;margin-bottom:.3rem">⚠️ 중요 안내</div>
+              <p style="font-size:.82rem;color:rgba(232,234,240,.7);line-height:1.7">권한을 양도하면 현재 계정(홍길동)은 일반 회원으로 변경됩니다. 매년 새 임원에게 권한을 이전하세요.</p>
+            </div>
+            <div class="form-group"><label class="fl">새 관리자 선택</label>
+              <select><option value="">회원을 선택해주세요</option><option>이수빈 (32201234) - 시각디자인학과</option><option>박지호 (32202345) - 컴퓨터공학과</option><option>최다연 (32203456) - 소프트웨어학과</option></select>
+            </div>
+            <div class="form-group"><label class="fl">확인 문구 입력: <span style="color:var(--accent3)">관리자권한양도</span></label><input id="transferConfirm" placeholder="관리자권한양도" oninput="checkTransferConfirm(this)"/></div>
+            <button id="transferBtn" class="form-btn" style="background:rgba(255,107,107,.3);cursor:not-allowed" disabled onclick="toast('관리자 권한이 양도되었습니다. 다시 로그인해주세요.','success')">관리자 권한 양도</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MODALS ═══════════════════ -->
+
+<!-- 인증 모달 -->
+<div class="modal-overlay" id="authModal" onclick="if(event.target===this)closeModal('auth')">
+  <div class="modal">
+    <div class="modal-header">
+      <div><div class="modal-title" id="authModalTitle">로그인</div><div style="font-size:.75rem;color:var(--muted);margin-top:.2rem;font-family:'Space Grotesk',sans-serif">CAGI Member Portal</div></div>
+      <button class="modal-close" onclick="closeModal('auth')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tabs">
+        <button class="m-tab active" id="tab-login" onclick="switchAuthTab('login')">로그인</button>
+        <button class="m-tab" id="tab-signup" onclick="switchAuthTab('signup')">회원가입</button>
+      </div>
+      <!-- 로그인 -->
+      <div id="loginForm">
+        <div class="form-group"><label class="fl">이메일</label><input type="email" id="loginEmail" placeholder="example@dankook.ac.kr"/></div>
+        <div class="form-group"><label class="fl">비밀번호</label><input type="password" id="loginPw" placeholder="••••••••"/></div>
+        <button class="form-btn" onclick="doLogin()">로그인</button>
+        <div style="text-align:center;color:var(--muted);font-size:.78rem;margin:1rem 0">또는</div>
+        <button onclick="demoLogin()" style="width:100%;padding:.85rem;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:.88rem;cursor:pointer">🎭 데모 계정으로 체험</button>
+        <div style="text-align:center;margin-top:.8rem"><button onclick="demoAdminLogin()" style="background:none;border:none;color:rgba(123,97,255,.7);font-size:.78rem;cursor:pointer;font-family:'Space Grotesk',sans-serif">🛡 관리자 데모 체험</button></div>
+      </div>
+      <!-- 회원가입 -->
+      <div id="signupForm" style="display:none">
+        <div class="form-group"><label class="fl">이름</label><input type="text" placeholder="홍길동"/></div>
+        <div class="form-row">
+          <div class="form-group"><label class="fl">학번</label><input type="text" placeholder="32200000"/></div>
+          <div class="form-group"><label class="fl">학년</label><select><option value="">선택</option><option>1학년</option><option>2학년</option><option>3학년</option><option>4학년</option></select></div>
+        </div>
+        <div class="form-group"><label class="fl">전공</label><input type="text" placeholder="컴퓨터공학과"/></div>
+        <div class="form-group"><label class="fl">생년월일</label><input type="date"/></div>
+        <div class="form-group"><label class="fl">성별</label>
+          <div class="radio-group">
+            <label class="radio-label selected" onclick="selectRadio(this,'gender')"><input type="radio" name="gender" value="남" checked>남</label>
+            <label class="radio-label" onclick="selectRadio(this,'gender')"><input type="radio" name="gender" value="여">여</label>
+            <label class="radio-label" onclick="selectRadio(this,'gender')"><input type="radio" name="gender" value="기타">기타</label>
+          </div>
+        </div>
+        <div class="form-group"><label class="fl">재학 상태</label>
+          <div class="radio-group">
+            <label class="radio-label selected" onclick="selectRadio(this,'status')"><input type="radio" name="status" value="재학생" checked>재학생</label>
+            <label class="radio-label" onclick="selectRadio(this,'status')"><input type="radio" name="status" value="졸업생">졸업생</label>
+          </div>
+        </div>
+        <div class="form-group"><label class="fl">이메일</label><input type="email" placeholder="example@dankook.ac.kr"/></div>
+        <div class="form-group"><label class="fl">비밀번호</label><input type="password" placeholder="8자 이상"/></div>
+        <label class="agree-label"><input type="checkbox"/><span><a href="#">이용약관</a> 및 <a href="#">개인정보처리방침</a>에 동의합니다</span></label>
+        <button class="form-btn" style="margin-top:1rem" onclick="doSignup()">가입하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 포트폴리오 상세 모달 -->
+<div class="modal-overlay" id="portfolioModal" onclick="if(event.target===this)closeModal('portfolio')">
+  <div class="modal detail-modal" style="max-width:660px">
+    <div class="detail-img" id="detailImg"></div>
+    <div class="detail-body">
+      <div style="font-size:.7rem;color:var(--accent);letter-spacing:.15em;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;margin-bottom:.4rem" id="detailCat"></div>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:#fff;letter-spacing:.03em;margin-bottom:1rem" id="detailTitle"></h2>
+      <div class="detail-author">
+        <div class="detail-avatar" id="detailAvatar"></div>
+        <div><div style="font-size:.9rem;color:#fff;font-weight:500" id="detailAuthor"></div><div style="font-size:.75rem;color:var(--muted)" id="detailMajor"></div></div>
+        <button class="modal-close" onclick="closeModal('portfolio')" style="margin-left:auto">✕</button>
+      </div>
+      <p style="color:rgba(232,234,240,.7);font-size:.88rem;line-height:1.8;margin-bottom:1.2rem" id="detailDesc"></p>
+      <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.2rem" id="detailTags"></div>
+      <div style="margin-bottom:1.5rem" id="detailTools"></div>
+      <div style="display:flex;gap:1rem;align-items:center">
+        <button class="like-btn" id="likeBtn" onclick="toggleLike()">♡ <span id="likeCount">0</span></button>
+        <span style="font-size:.78rem;color:var(--muted);font-family:'Space Grotesk',sans-serif" id="detailViews"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 스터디 상세 모달 -->
+<div class="modal-overlay" id="studyModal" onclick="if(event.target===this)closeModal('study')">
+  <div class="modal study-detail-modal">
+    <div class="sd-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><div style="font-size:.7rem;color:var(--accent);letter-spacing:.15em;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;margin-bottom:.4rem" id="sdCat"></div><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:#fff;letter-spacing:.05em" id="sdTitle"></div></div>
+        <button class="modal-close" onclick="closeModal('study')">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--muted);font-size:.88rem;line-height:1.8;margin-bottom:1.5rem" id="sdDesc"></p>
+      <div class="detail-grid">
+        <div class="detail-item"><label class="fl">일정</label><span id="sdSched"></span></div>
+        <div class="detail-item"><label class="fl">장소</label><span id="sdLoc"></span></div>
+        <div class="detail-item"><label class="fl">기간</label><span id="sdDur"></span></div>
+        <div class="detail-item"><label class="fl">신청 마감</label><span id="sdDead"></span></div>
+      </div>
+      <div style="margin-bottom:1.5rem">
+        <div style="display:flex;justify-content:space-between;margin-bottom:.4rem"><span style="font-size:.78rem;color:var(--muted);font-family:'Space Grotesk',sans-serif">모집 현황</span><span style="font-size:.78rem;color:var(--accent);font-family:'Space Grotesk',sans-serif" id="sdCnt"></span></div>
+        <div class="progress-bar"><div class="progress-fill" id="sdProg" style="width:0%"></div></div>
+      </div>
+      <div id="sdApplySection">
+        <div class="form-group"><label class="fl">신청 동기 (선택)</label><textarea id="sdMotiv" placeholder="스터디에 참여하고 싶은 이유를 간단히 적어주세요."></textarea></div>
+        <button class="form-btn" id="sdApplyBtn" onclick="applyStudy()">스터디 신청하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toastEl"></div>
+
+<script>
+// ── 데이터 ─────────────────────────────────
+const PORTFOLIOS = [
+  {id:1,title:'사막 환경 씬',author:'김민준',major:'시각디자인 3학년',category:'3D',tools:['Blender','Substance Painter'],tags:['3D아트','환경디자인'],desc:'Blender로 제작한 사막 환경 씬입니다. PBR 텍스처와 볼류메트릭 라이팅을 활용했습니다.',likes:42,views:287,color:'#FF6B35'},
+  {id:2,title:'인디 게임 프로토타입',author:'이수빈',major:'소프트웨어 2학년',category:'게임',tools:['Unity','C#','Shader Graph'],tags:['게임개발','인디게임'],desc:'Unity로 제작한 2D 플랫폼 게임 프로토타입입니다. 커스텀 물리 엔진과 절차적 맵 생성 시스템을 구현했습니다.',likes:38,views:194,color:'#7B61FF'},
+  {id:3,title:'타이포그래피 모션',author:'박지호',major:'컴퓨터공학 4학년',category:'프로그래밍',tools:['Three.js','GLSL','JavaScript'],tags:['모션그래픽','웹'],desc:'Three.js와 커스텀 GLSL 쉐이더로 만든 인터랙티브 타이포그래피 작품입니다.',likes:29,views:156,color:'#00D4FF'},
+  {id:4,title:'로봇 캐릭터 모델링',author:'최다연',major:'시각디자인 1학년',category:'3D',tools:['Blender','ZBrush','Substance'],tags:['캐릭터','모델링'],desc:'스컬핑부터 텍스처링, 리깅까지 전 과정을 혼자 진행한 로봇 캐릭터입니다.',likes:55,views:412,color:'#FF6B6B'},
+  {id:5,title:'슈팅게임 데모',author:'한승우',major:'소프트웨어 3학년',category:'게임',tools:['Unity','Shader Graph','Cinemachine'],tags:['게임','쉐이더'],desc:'Unity Universal Render Pipeline을 활용한 3D 슈팅 게임 데모입니다.',likes:33,views:203,color:'#4CAF50'},
+  {id:6,title:'파티클 시스템',author:'정예린',major:'컴퓨터공학 2학년',category:'프로그래밍',tools:['Three.js','WebGL','GLSL'],desc:'GPU 기반 파티클 시스템을 WebGL로 직접 구현한 작품입니다. 최대 100만 파티클을 60fps로 렌더링합니다.',likes:47,views:321,tags:['WebGL','GLSL'],color:'#FFD700'},
+]
+const STUDIES = [
+  {id:1,title:'Blender 기초 스터디',category:'Blender',icon:'🧊',schedule:'매주 화요일 18:00',location:'공학관 301호',duration:'8주',deadline:'2024.12.31',max:12,current:7,desc:'Blender를 처음 접하는 분들을 위한 기초 스터디입니다. 모델링부터 렌더링까지 단계별로 배웁니다.',status:'open'},
+  {id:2,title:'Unity 게임 개발',category:'Unity',icon:'🎮',schedule:'매주 목요일 18:00',location:'공학관 203호',duration:'10주',deadline:'2024.12.25',max:10,current:10,desc:'Unity를 활용한 2D/3D 게임 개발 스터디입니다.',status:'open'},
+  {id:3,title:'웹 프론트엔드 스터디',category:'프로그래밍',icon:'💻',schedule:'매주 수요일 19:00',location:'온라인(Discord)',duration:'6주',deadline:'2025.01.10',max:15,current:4,desc:'React와 TypeScript를 활용한 모던 웹 개발 스터디입니다.',status:'open'},
+  {id:4,title:'쉐이더 아트 워크샵',category:'기타',icon:'✨',schedule:'격주 토요일 14:00',location:'공학관 B101',duration:'4회',deadline:'2025.01.05',max:8,current:3,desc:'GLSL과 Shader Graph를 활용한 쉐이더 아트 워크샵입니다.',status:'open'},
+]
+const MEMBERS = [
+  {name:'홍길동',id:'32200001',major:'컴퓨터공학',grade:2,status:'재학생',role:'admin'},
+  {name:'김민준',id:'32200456',major:'시각디자인',grade:3,status:'재학생',role:'member'},
+  {name:'이수빈',id:'32201234',major:'소프트웨어',grade:2,status:'재학생',role:'member'},
+  {name:'박지호',id:'32202345',major:'컴퓨터공학',grade:4,status:'재학생',role:'member'},
+  {name:'최다연',id:'32203456',major:'시각디자인',grade:1,status:'재학생',role:'member'},
+  {name:'한승우',id:'31900789',major:'멀티미디어',grade:4,status:'졸업생',role:'member'},
+  {name:'정예린',id:'32100111',major:'컴퓨터공학',grade:3,status:'재학생',role:'member'},
+]
+
+// ── 상태 ────────────────────────────────────
+let loggedIn = false, isAdmin = false, currentStudy = null, likedSet = new Set(), appliedSet = new Set()
+
+// ── 파티클 ───────────────────────────────────
+(function initParticles(){
+  const c = document.getElementById('heroCanvas')
+  if(!c) return
+  const ctx = c.getContext('2d')
+  let pts = [], raf
+  const resize = () => { c.width = window.innerWidth; c.height = window.innerHeight }
+  resize(); window.addEventListener('resize', resize)
+  for(let i=0;i<80;i++) pts.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*1.4+.3,op:Math.random()*.5+.1,col:Math.random()>.7?'#00D4FF':Math.random()>.5?'#7B61FF':'#fff'})
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height)
+    pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>c.width||p.y<0||p.y>c.height){p.x=Math.random()*c.width;p.y=Math.random()*c.height}ctx.globalAlpha=p.op;ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill()})
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<100){ctx.globalAlpha=(1-d/100)*.07;ctx.strokeStyle='#00D4FF';ctx.lineWidth=.5;ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.stroke()}}
+    ctx.globalAlpha=1;raf=requestAnimationFrame(draw)
+  }
+  draw()
+})()
+
+// ── 카운트업 ─────────────────────────────────
+function countUp(el, target){ let c=0; const go=()=>{c+=target/90;el.textContent=Math.min(Math.floor(c),target)+(target>=100?'+':'');if(c<target)requestAnimationFrame(go);else el.textContent=target+(target>=100?'+':'')}; go() }
+const ob = new IntersectionObserver(es=>{if(es[0].isIntersecting){document.querySelectorAll('[data-count]').forEach(e=>countUp(e,parseInt(e.dataset.count)));ob.disconnect()}},{threshold:.5})
+const hs = document.querySelector('.hero-stats'); if(hs) ob.observe(hs)
+
+// ── 페이지 이동 ──────────────────────────────
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
+  document.getElementById('page-'+name).classList.add('active')
+  window.scrollTo(0,0)
+  if(name==='portfolio') renderPortfolioPage()
+  if(name==='studies')   renderStudiesPage()
+  if(name==='admin')     renderAdminPage()
+  if(name==='profile')   renderProfilePage()
+  if(name==='home')      renderHome()
+}
+
+// ── 렌더 함수 ────────────────────────────────
+function renderHome(){
+  const g = document.getElementById('homePortfolioGrid')
+  if(g) g.innerHTML = PORTFOLIOS.slice(0,6).map(p=>pCardHTML(p)).join('')
+  const sl = document.getElementById('homeStudyList')
+  if(sl) sl.innerHTML = STUDIES.slice(0,3).map(s=>studyRowHTML(s)).join('')
+}
+
+function renderPortfolioPage(filter='전체'){
+  const pts = filter==='전체' ? PORTFOLIOS : PORTFOLIOS.filter(p=>p.category===filter)
+  const g = document.getElementById('portfolioGrid')
+  if(g) g.innerHTML = pts.map(p=>pCardHTML(p)).join('')
+  if(loggedIn){ const b=document.getElementById('uploadBtn'); if(b) b.style.display='block' }
+}
+
+function renderStudiesPage(){
+  const el = document.getElementById('studyListFull')
+  if(el) el.innerHTML = STUDIES.map(s=>studyRowHTML(s,true)).join('')
+}
+
+function renderAdminPage(){
+  // 회원 테이블
+  const tb = document.getElementById('membersTbody')
+  if(tb) renderMembersTable('all')
+  // 어드민 스터디 목록
+  const asl = document.getElementById('adminStudyList')
+  if(asl) asl.innerHTML = STUDIES.map(s=>`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.6rem;display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-size:.9rem;font-weight:500;color:#fff;margin-bottom:.2rem">${s.title}</div><div style="font-size:.75rem;color:var(--muted)">${s.category} · ${s.current}/${s.max}명</div></div>
+      <div style="display:flex;gap:.5rem">
+        <span class="badge status-open" style="font-size:.7rem">${s.current>=s.max?'마감':'모집중'}</span>
+        <button onclick="openStudyApplicants(${s.id})" style="padding:.3rem .7rem;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);border-radius:6px;color:var(--accent);font-size:.72rem;cursor:pointer;font-family:'Space Grotesk',sans-serif">신청자 보기</button>
+      </div>
+    </div>`).join('')
+  // 어드민 포트폴리오 목록
+  const apl = document.getElementById('adminPortfolioList')
+  if(apl) apl.innerHTML = PORTFOLIOS.map((p,i)=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:.8rem 0;${i<PORTFOLIOS.length-1?'border-bottom:1px solid rgba(255,255,255,.05)':''}">
+      <div><div style="font-size:.9rem;color:#fff;font-weight:500">${p.title}</div><div style="font-size:.75rem;color:var(--muted)">by ${p.author} · ${p.category} · 조회 ${p.views}</div></div>
+      <div style="display:flex;gap:.5rem">
+        <button style="padding:.3rem .7rem;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);border-radius:6px;color:var(--accent);font-size:.72rem;cursor:pointer" onclick="toast('공개 상태가 변경되었습니다','success')">공개</button>
+        <button style="padding:.3rem .7rem;background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.2);border-radius:6px;color:var(--accent3);font-size:.72rem;cursor:pointer" onclick="toast('삭제되었습니다','success')">삭제</button>
+      </div>
+    </div>`).join('')
+}
+
+function renderProfilePage(){
+  const ml = document.getElementById('myPortfolioList')
+  if(ml) ml.innerHTML = PORTFOLIOS.slice(0,3).map((p,i)=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:.65rem 0;${i<2?'border-bottom:1px solid rgba(255,255,255,.05)':''}">
+      <div><div style="font-size:.88rem;color:#fff;font-weight:500">${p.title}</div><div style="font-size:.72rem;color:var(--muted)">${p.category} · ♡${p.likes} · 조회 ${p.views}</div></div>
+      <button style="padding:.25rem .6rem;background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.2);border-radius:6px;color:var(--accent3);font-size:.7rem;cursor:pointer" onclick="toast('삭제되었습니다','success')">삭제</button>
+    </div>`).join('')
+}
+
+// ── HTML 빌더 ────────────────────────────────
+function pCardHTML(p){
+  return `<div class="p-card" onclick="openPortfolio(${p.id})">
+    <div class="p-thumb" style="background:linear-gradient(135deg,${p.color}20 0%,var(--surface2) 60%)"><span style="color:${p.color}30">${p.category}</span><div class="p-overlay"><span class="p-tag">${p.category}</span></div></div>
+    <div class="p-info"><div class="p-meta"><span>by ${p.author}</span><span>♡ ${p.likes}</span></div><div class="p-title">${p.title}</div><div style="display:flex;flex-wrap:wrap;gap:.3rem">${p.tools.map(t=>`<span class="tool-badge">${t}</span>`).join('')}</div></div>
+  </div>`
+}
+function studyRowHTML(s, full=false){
+  const pct = Math.round(s.current/s.max*100)
+  const closed = s.current>=s.max
+  return `<div class="study-row" onclick="${full?'openStudyDetail('+s.id+')':'showPage(\'studies\')'}">
+    <div class="study-icon">${s.icon}</div>
+    <div>
+      <div style="font-size:1rem;font-weight:500;color:#fff;margin-bottom:.2rem">${s.title}</div>
+      <div style="font-size:.82rem;color:var(--muted)">${s.schedule} · ${s.location}</div>
+      ${full?`<div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${closed?'var(--accent3)':'var(--accent)'}"></div></div>`:''}
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem">
+      <span class="study-status ${closed?'status-closed':'status-open'}">${closed?'마감':'모집중'}</span>
+      <span style="font-size:.78rem;color:var(--muted);font-family:'Space Grotesk',sans-serif">${s.current}/${s.max}명</span>
+    </div>
+  </div>`
+}
+
+// ── 모달 ────────────────────────────────────
+function openModal(type,tab='login'){
+  if(type==='auth'){ switchAuthTab(tab); document.getElementById('authModal').classList.add('open') }
+  if(type==='portfolio') document.getElementById('portfolioModal').classList.add('open')
+  if(type==='study') document.getElementById('studyModal').classList.add('open')
+}
+function closeModal(type){
+  const ids={auth:'authModal',portfolio:'portfolioModal',study:'studyModal'}
+  document.getElementById(ids[type]).classList.remove('open')
+}
+function switchAuthTab(tab){
+  document.getElementById('loginForm').style.display = tab==='login'?'block':'none'
+  document.getElementById('signupForm').style.display = tab==='signup'?'block':'none'
+  document.getElementById('authModalTitle').textContent = tab==='login'?'로그인':'회원가입'
+  document.getElementById('tab-login').classList.toggle('active',tab==='login')
+  document.getElementById('tab-signup').classList.toggle('active',tab==='signup')
+}
+
+// ── 인증 ────────────────────────────────────
+function doLogin(){
+  const email=document.getElementById('loginEmail').value, pw=document.getElementById('loginPw').value
+  if(!email||!pw){toast('이메일과 비밀번호를 입력하세요','error');return}
+  loginSuccess(false)
+}
+function doSignup(){ toast('가입 완료! 이메일을 확인해주세요.','success'); switchAuthTab('login') }
+function demoLogin(){ loginSuccess(false) }
+function demoAdminLogin(){ loginSuccess(true) }
+function loginSuccess(admin){
+  loggedIn=true; isAdmin=admin
+  document.getElementById('navRight').innerHTML = `
+    <button class="btn-ghost" onclick="requireLogin('upload')">작품 올리기</button>
+    <button class="btn-ghost" onclick="showPage('profile')" style="display:flex;align-items:center;gap:.4rem"><span style="width:22px;height:22px;border-radius:50%;background:var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--bg);font-weight:700">홍</span>홍길동</button>
+    ${admin?'<button class="btn-ghost" onclick="showPage(\'admin\')" style="border-color:rgba(123,97,255,.4);color:rgba(123,97,255,.9)">🛡 관리자</button>':''}
+    <button class="btn-ghost" onclick="doLogout()">로그아웃</button>`
+  if(admin){ document.getElementById('adminBar').style.display='flex'; document.getElementById('profileRoleBadge').textContent='🛡 관리자'; document.getElementById('mainNav').style.top='32px' }
+  const ub=document.getElementById('uploadBtn'); if(ub) ub.style.display='block'
+  closeModal('auth')
+  toast(admin?'관리자 계정으로 로그인되었습니다!':'로그인되었습니다!','success')
+}
+function doLogout(){
+  loggedIn=false; isAdmin=false
+  document.getElementById('navRight').innerHTML = `<button class="btn-ghost" onclick="openModal('auth','login')">로그인</button><button class="btn-accent" onclick="openModal('auth','signup')">회원가입</button>`
+  document.getElementById('adminBar').style.display='none'
+  document.getElementById('mainNav').style.top='0'
+  showPage('home')
+  toast('로그아웃되었습니다','success')
+}
+function requireLogin(dest){ if(!loggedIn){openModal('auth','login');return} showPage(dest) }
+
+// ── 포트폴리오 상세 ──────────────────────────
+function openPortfolio(id){
+  const p = PORTFOLIOS.find(x=>x.id===id)
+  if(!p) return
+  document.getElementById('detailImg').style.cssText=`background:linear-gradient(135deg,${p.color}25 0%,var(--surface2) 60%);color:${p.color}25`
+  document.getElementById('detailImg').textContent = p.category
+  document.getElementById('detailCat').textContent = p.category
+  document.getElementById('detailTitle').textContent = p.title
+  document.getElementById('detailAuthor').textContent = p.author
+  document.getElementById('detailAvatar').textContent = p.author[0]
+  document.getElementById('detailMajor').textContent = p.major
+  document.getElementById('detailDesc').textContent = p.desc||''
+  document.getElementById('detailTags').innerHTML = (p.tags||[]).map(t=>`<span style="padding:.2rem .7rem;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.15);border-radius:100px;font-size:.72rem;color:var(--accent)">#${t}</span>`).join('')
+  document.getElementById('detailTools').innerHTML = `<div style="font-size:.72rem;color:var(--muted);font-family:'Space Grotesk',sans-serif;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem">사용 툴</div><div style="display:flex;flex-wrap:wrap;gap:.4rem">${p.tools.map(t=>`<span style="padding:.3rem .7rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;font-size:.78rem;color:var(--text)">${t}</span>`).join('')}</div>`
+  document.getElementById('likeCount').textContent = p.likes + (likedSet.has(id)?1:0)
+  document.getElementById('likeBtn').className = 'like-btn'+(likedSet.has(id)?' liked':'')
+  document.getElementById('likeBtn').innerHTML = (likedSet.has(id)?'♥':'♡') + ' <span id="likeCount">'+(p.likes+(likedSet.has(id)?1:0))+'</span>'
+  document.getElementById('detailViews').textContent = '조회 '+(p.views+1)
+  document.getElementById('portfolioModal').dataset.current = id
+  openModal('portfolio')
+}
+function toggleLike(){
+  if(!loggedIn){closeModal('portfolio');openModal('auth','login');return}
+  const id = parseInt(document.getElementById('portfolioModal').dataset.current)
+  if(likedSet.has(id)) likedSet.delete(id); else likedSet.add(id)
+  const p = PORTFOLIOS.find(x=>x.id===id)
+  const btn = document.getElementById('likeBtn')
+  const liked = likedSet.has(id)
+  btn.className='like-btn'+(liked?' liked':'')
+  btn.innerHTML=(liked?'♥':'♡')+' <span id="likeCount">'+(p.likes+(liked?1:0))+'</span>'
+}
+
+// ── 스터디 ──────────────────────────────────
+function openStudyDetail(id){
+  const s = STUDIES.find(x=>x.id===id); if(!s) return; currentStudy=s
+  document.getElementById('sdCat').textContent=s.category
+  document.getElementById('sdTitle').textContent=s.title
+  document.getElementById('sdDesc').textContent=s.desc
+  document.getElementById('sdSched').textContent=s.schedule
+  document.getElementById('sdLoc').textContent=s.location
+  document.getElementById('sdDur').textContent=s.duration
+  document.getElementById('sdDead').textContent=s.deadline
+  document.getElementById('sdCnt').textContent=`${s.current}/${s.max}명`
+  document.getElementById('sdProg').style.width=`${Math.round(s.current/s.max*100)}%`
+  const sec = document.getElementById('sdApplySection')
+  const applied = appliedSet.has(id)
+  const closed = s.current>=s.max
+  if(applied){sec.innerHTML='<div style="padding:1rem;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:8px;text-align:center;color:var(--accent);font-size:.9rem">✓ 신청이 완료되었습니다. 관리자 검토 후 연락드립니다.</div>'}
+  else if(closed){sec.innerHTML='<div style="padding:1rem;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.2);border-radius:8px;text-align:center;color:var(--accent3);font-size:.9rem">모집이 마감되었습니다</div>'}
+  else{sec.innerHTML=`<div class="form-group"><label class="fl">신청 동기 (선택)</label><textarea id="sdMotiv" placeholder="스터디에 참여하고 싶은 이유를 간단히 적어주세요."></textarea></div><button class="form-btn" onclick="applyStudy()">스터디 신청하기</button>`}
+  openModal('study')
+}
+function applyStudy(){
+  if(!loggedIn){closeModal('study');openModal('auth','login');return}
+  appliedSet.add(currentStudy.id)
+  toast('스터디 신청이 완료되었습니다!','success')
+  closeModal('study')
+}
+
+// ── 관리자 탭 ────────────────────────────────
+function switchAdminTab(id,btn){
+  document.querySelectorAll('.admin-tab-content').forEach(el=>el.classList.remove('active'))
+  document.querySelectorAll('.admin-nav-btn').forEach(b=>b.classList.remove('active'))
+  document.getElementById('admin-'+id).classList.add('active')
+  btn.classList.add('active')
+}
+function renderMembersTable(filter){
+  const rows = filter==='all' ? MEMBERS : MEMBERS.filter(m=>m.status===filter)
+  document.getElementById('membersTbody').innerHTML = rows.map(m=>`
+    <tr>
+      <td style="color:#fff;font-weight:500">${m.name}</td>
+      <td style="color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:.82rem">${m.id}</td>
+      <td style="color:var(--muted)">${m.major}</td>
+      <td style="color:var(--muted)">${m.grade}학년</td>
+      <td><span class="badge ${m.status==='재학생'?'status-open':'status-closed'}" style="font-size:.68rem">${m.status}</span></td>
+      <td><span style="padding:.15rem .5rem;border-radius:100px;font-size:.68rem;${m.role!=='member'?'background:rgba(123,97,255,.1);color:rgba(123,97,255,.9);border:1px solid rgba(123,97,255,.2)':'color:var(--muted)'}">${m.role==='admin'?'관리자':m.role==='superadmin'?'최고관리자':'일반'}</span></td>
+    </tr>`).join('')
+}
+function filterMembers(filter,btn){
+  document.querySelectorAll('#admin-members .filter-btn').forEach(b=>b.classList.remove('active'))
+  btn.classList.add('active')
+  renderMembersTable(filter)
+}
+function openStudyApplicants(id){
+  const s = STUDIES.find(x=>x.id===id)
+  const names = ['이수빈','박지호','최다연','한승우','정예린'].slice(0,s.current)
+  toast(`"${s.title}" 신청자 ${s.current}명: ${names.join(', ')}`, 'success')
+}
+function toggleCreateStudy(){ const f=document.getElementById('createStudyForm'); f.style.display=f.style.display==='none'?'block':'none' }
+function selectHeroType(btn,type){
+  document.querySelectorAll('#admin-hero .filter-btn').forEach(b=>b.classList.remove('active'))
+  btn.classList.add('active')
+  document.getElementById('heroFileGroup').style.display = type==='gradient'?'none':'block'
+}
+function checkTransferConfirm(input){
+  const btn=document.getElementById('transferBtn')
+  const ok=input.value==='관리자권한양도'
+  btn.disabled=!ok
+  btn.style.background=ok?'var(--accent3)':'rgba(255,107,107,.3)'
+  btn.style.cursor=ok?'pointer':'not-allowed'
+}
+
+// ── 포트폴리오 필터 ──────────────────────────
+function filterP(cat,btn){
+  document.querySelectorAll('#portfolioFilters .filter-btn').forEach(b=>b.classList.remove('active'))
+  btn.classList.add('active')
+  renderPortfolioPage(cat)
+}
+
+// ── 업로드 ──────────────────────────────────
+function previewThumb(input){
+  const file = input.files[0]; if(!file) return
+  const url = URL.createObjectURL(file)
+  const dz = document.getElementById('thumbDropzone')
+  dz.style.backgroundImage=`url(${url})`; dz.style.backgroundSize='cover'; dz.style.backgroundPosition='center'
+  dz.textContent=''; dz.style.border='none'
+}
+function submitUpload(){
+  const title = document.getElementById('uploadTitle').value
+  const cat = document.getElementById('uploadCat').value
+  if(!title){toast('제목을 입력해주세요','error');return}
+  if(!cat){toast('카테고리를 선택해주세요','error');return}
+  toast('포트폴리오가 등록되었습니다!','success')
+  setTimeout(()=>showPage('portfolio'), 800)
+}
+
+// ── 라디오 버튼 UI ───────────────────────────
+function selectRadio(label,group){
+  document.querySelectorAll(`[name="${group}"]`).forEach(r=>r.closest('.radio-label').classList.remove('selected'))
+  label.classList.add('selected')
+}
+
+// ── 토스트 ──────────────────────────────────
+function toast(msg, type='success'){
+  const el = document.getElementById('toastEl')
+  el.className = `toast ${type} show`
+  el.innerHTML = `<span>${type==='success'?'✓':'✕'}</span> ${msg}`
+  clearTimeout(el._t)
+  el._t = setTimeout(()=>el.classList.remove('show'), 3200)
+}
+
+// ── 초기화 ──────────────────────────────────
+renderHome()
+</script>
+</body>
+</html>

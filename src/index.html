@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CAGI — 단국대학교 컴퓨터그래픽 동아리</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #080A0F;
+  --surface: #0D1117;
+  --surface2: #161B24;
+  --border: rgba(255,255,255,0.07);
+  --accent: #00D4FF;
+  --accent2: #7B61FF;
+  --accent3: #FF6B6B;
+  --text: #E8EAF0;
+  --muted: #6B7280;
+  --white: #FFFFFF;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans KR', sans-serif;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+/* ── SCROLLBAR ─────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+/* ── NAV ─────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 2.5rem;
+  background: rgba(8,10,15,0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  transition: all 0.3s;
+}
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  letter-spacing: 0.15em;
+  color: var(--white);
+  text-decoration: none;
+  display: flex; align-items: center; gap: 0.6rem;
+}
+.nav-logo .dot {
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+.nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
+.nav-links a {
+  color: var(--muted); text-decoration: none;
+  font-size: 0.85rem; letter-spacing: 0.05em;
+  font-family: 'Space Grotesk', sans-serif;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--white); }
+.nav-btn {
+  padding: 0.5rem 1.2rem;
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  border-radius: 6px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+}
+.nav-btn:hover { background: var(--accent); color: var(--bg); }
+.nav-btn.filled { background: var(--accent); color: var(--bg); margin-left: 0.5rem; }
+.nav-btn.filled:hover { background: transparent; color: var(--accent); }
+
+/* ── HERO ─────────────────────────────────────── */
+#hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.hero-canvas {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 20% 50%, rgba(0,212,255,0.08) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 20%, rgba(123,97,255,0.08) 0%, transparent 60%),
+              var(--bg);
+}
+/* 그리드 배경 */
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+}
+/* 유동 파티클 캔버스 */
+#particleCanvas {
+  position: absolute; inset: 0;
+  pointer-events: none;
+}
+.hero-content {
+  position: relative; z-index: 10;
+  text-align: center;
+  padding: 2rem;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.35rem 1rem;
+  background: rgba(0,212,255,0.08);
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 100px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.75rem;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  animation: fadeInUp 0.8s ease both;
+}
+.hero-badge .line { width: 20px; height: 1px; background: var(--accent); }
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(5rem, 16vw, 12rem);
+  line-height: 0.9;
+  letter-spacing: 0.05em;
+  color: var(--white);
+  animation: fadeInUp 0.8s 0.1s ease both;
+}
+.hero-title .accent { color: var(--accent); }
+.hero-subtitle {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  color: var(--muted);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin: 1rem 0 2rem;
+  animation: fadeInUp 0.8s 0.2s ease both;
+}
+.hero-desc {
+  font-size: 1rem;
+  color: rgba(232,234,240,0.6);
+  max-width: 420px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.8;
+  animation: fadeInUp 0.8s 0.3s ease both;
+}
+.hero-actions {
+  display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+  animation: fadeInUp 0.8s 0.4s ease both;
+}
+.btn-primary {
+  padding: 0.85rem 2rem;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+  text-decoration: none; display: inline-block;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,212,255,0.3); }
+.btn-ghost {
+  padding: 0.85rem 2rem;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+  text-decoration: none; display: inline-block;
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.hero-stats {
+  position: absolute; bottom: 3rem; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 3rem;
+  animation: fadeInUp 0.8s 0.6s ease both;
+}
+.stat { text-align: center; }
+.stat-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.2rem;
+  color: var(--white);
+  letter-spacing: 0.05em;
+  display: block;
+}
+.stat-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.scroll-hint {
+  position: absolute; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+  color: var(--muted); font-size: 0.7rem;
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: 0.15em;
+  animation: bounce 2s infinite;
+}
+.scroll-hint .arrow { font-size: 1rem; }
+@keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(-6px)} }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── SECTION COMMON ─────────────────────────── */
+section { padding: 6rem 2.5rem; max-width: 1200px; margin: 0 auto; }
+.section-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.8rem;
+  display: flex; align-items: center; gap: 0.8rem;
+}
+.section-label::before { content:''; display:block; width:24px; height:1px; background:var(--accent); }
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  line-height: 1;
+  letter-spacing: 0.03em;
+  color: var(--white);
+  margin-bottom: 0.5rem;
+}
+.section-subtitle { color: var(--muted); font-size: 0.95rem; max-width: 480px; line-height: 1.8; }
+
+/* ── ABOUT ───────────────────────────────────── */
+#about { 
+  max-width: 100%;
+  padding: 6rem 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.about-inner { max-width: 1200px; margin: 0 auto; padding: 0 2.5rem; }
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+.about-image {
+  position: relative;
+  aspect-ratio: 4/3;
+  background: var(--surface2);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.about-image-inner {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 6rem;
+  color: rgba(0,212,255,0.1);
+  letter-spacing: 0.1em;
+}
+.about-image-badge {
+  position: absolute; bottom: 1.5rem; left: 1.5rem;
+  background: rgba(0,212,255,0.1);
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.about-image-badge .year {
+  font-size: 0.65rem; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase;
+}
+.about-image-badge .text { font-size: 0.9rem; color: var(--white); font-weight: 600; }
+.about-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 2rem; }
+.pill {
+  padding: 0.3rem 0.8rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-family: 'Space Grotesk', sans-serif;
+}
+.pill.highlight { border-color: rgba(0,212,255,0.3); color: var(--accent); background: rgba(0,212,255,0.05); }
+
+/* ── PORTFOLIO ───────────────────────────────── */
+.portfolio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+.portfolio-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+.portfolio-card:hover {
+  border-color: rgba(0,212,255,0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.portfolio-thumb {
+  aspect-ratio: 16/9;
+  background: var(--surface2);
+  position: relative;
+  overflow: hidden;
+}
+.portfolio-thumb-placeholder {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3rem;
+  color: rgba(255,255,255,0.05);
+  letter-spacing: 0.1em;
+}
+.portfolio-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(8,10,15,0.9) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  display: flex; align-items: flex-end; justify-content: flex-end; padding: 1rem;
+}
+.portfolio-card:hover .portfolio-overlay { opacity: 1; }
+.portfolio-tag {
+  padding: 0.25rem 0.6rem;
+  background: var(--accent);
+  color: var(--bg);
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.portfolio-info { padding: 1.2rem; }
+.portfolio-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 0.4rem;
+}
+.portfolio-author {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-family: 'Space Grotesk', sans-serif;
+}
+.portfolio-likes { font-size: 0.72rem; color: var(--muted); display: flex; align-items: center; gap: 0.3rem; }
+.portfolio-title { font-size: 0.95rem; font-weight: 500; color: var(--white); margin-bottom: 0.3rem; }
+.portfolio-tools { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.6rem; }
+.tool-badge {
+  padding: 0.15rem 0.5rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.68rem;
+  color: var(--muted);
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* ── STUDIES ─────────────────────────────────── */
+.study-list { margin-top: 3rem; display: flex; flex-direction: column; gap: 1rem; }
+.study-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.8rem 2rem;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1.5rem;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.study-card:hover { border-color: rgba(0,212,255,0.2); transform: translateX(4px); }
+.study-icon {
+  width: 52px; height: 52px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+}
+.study-info h3 { font-size: 1rem; font-weight: 500; color: var(--white); margin-bottom: 0.2rem; }
+.study-info p { font-size: 0.82rem; color: var(--muted); }
+.study-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem; }
+.study-status {
+  padding: 0.2rem 0.7rem;
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+.study-status.open { background: rgba(0,212,255,0.1); color: var(--accent); border: 1px solid rgba(0,212,255,0.2); }
+.study-status.closed { background: rgba(255,107,107,0.1); color: var(--accent3); border: 1px solid rgba(255,107,107,0.2); }
+.study-count { font-size: 0.78rem; color: var(--muted); font-family: 'Space Grotesk', sans-serif; }
+
+/* ── MODAL ───────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+}
+.modal-overlay.active { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: scale(0.96) translateY(10px);
+  transition: transform 0.25s;
+}
+.modal-overlay.active .modal { transform: scale(1) translateY(0); }
+.modal-header {
+  padding: 1.8rem 2rem 0;
+  display: flex; justify-content: space-between; align-items: flex-start;
+}
+.modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--white); letter-spacing: 0.05em; }
+.modal-close {
+  background: none; border: none; color: var(--muted);
+  font-size: 1.3rem; cursor: pointer; padding: 0.2rem;
+  transition: color 0.2s;
+}
+.modal-close:hover { color: var(--white); }
+.modal-body { padding: 1.5rem 2rem 2rem; }
+.modal-tabs { display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+.modal-tab {
+  background: none; border: none; padding: 0.5rem 0 0.75rem;
+  color: var(--muted);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.88rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.2s;
+}
+.modal-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.form-group { margin-bottom: 1.1rem; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 0.35rem; letter-spacing: 0.05em; font-family: 'Space Grotesk', sans-serif; }
+input, select {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.65rem 0.9rem;
+  color: var(--text);
+  font-size: 0.88rem;
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: border-color 0.2s;
+  outline: none;
+}
+input:focus, select:focus { border-color: var(--accent); }
+input::placeholder { color: var(--muted); }
+select { appearance: none; cursor: pointer; }
+select option { background: var(--surface2); }
+.form-btn {
+  width: 100%; padding: 0.9rem;
+  background: var(--accent);
+  color: var(--bg);
+  border: none; border-radius: 8px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.9rem; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
+  letter-spacing: 0.05em;
+}
+.form-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,212,255,0.3); }
+.form-divider { text-align: center; color: var(--muted); font-size: 0.78rem; margin: 1rem 0; }
+.radio-group { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+.radio-label {
+  display: flex; align-items: center; gap: 0.4rem;
+  cursor: pointer;
+  font-size: 0.85rem; color: var(--text);
+  padding: 0.45rem 0.85rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+.radio-label:has(input:checked) { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.05); }
+.radio-label input { display: none; }
+.checkbox-label {
+  display: flex; align-items: center; gap: 0.5rem;
+  cursor: pointer; font-size: 0.82rem; color: var(--muted);
+  margin-top: 0.3rem;
+}
+.checkbox-label a { color: var(--accent); text-decoration: none; }
+.checkbox-label input[type="checkbox"] { width: auto; }
+
+/* ── FOOTER ──────────────────────────────────── */
+footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 3rem 2.5rem;
+  text-align: center;
+}
+.footer-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem; letter-spacing: 0.15em;
+  color: var(--white); margin-bottom: 0.5rem;
+}
+.footer-sub { font-size: 0.8rem; color: var(--muted); font-family: 'Space Grotesk', sans-serif; letter-spacing: 0.08em; }
+.footer-links { display: flex; gap: 2rem; justify-content: center; margin: 1.5rem 0; }
+.footer-links a { color: var(--muted); font-size: 0.8rem; text-decoration: none; transition: color 0.2s; font-family: 'Space Grotesk', sans-serif; }
+.footer-links a:hover { color: var(--accent); }
+.footer-copy { font-size: 0.72rem; color: rgba(107,114,128,0.5); font-family: 'Space Grotesk', sans-serif; }
+
+/* ── ADMIN NOTICE BANNER ─────────────────────── */
+.admin-banner {
+  background: rgba(123,97,255,0.1);
+  border-bottom: 1px solid rgba(123,97,255,0.2);
+  padding: 0.5rem 2rem;
+  display: flex; align-items: center; justify-content: center; gap: 0.8rem;
+  font-size: 0.78rem; color: rgba(123,97,255,0.9);
+  font-family: 'Space Grotesk', sans-serif;
+  position: fixed; top: 64px; left: 0; right: 0; z-index: 999;
+}
+.admin-banner .admin-dot { width: 6px; height: 6px; background: rgba(123,97,255,0.9); border-radius: 50%; animation: pulse 1.5s infinite; }
+
+/* ── STUDY DETAIL MODAL ──────────────────────── */
+.study-detail {
+  max-width: 560px;
+}
+.study-detail .detail-header {
+  padding: 2rem;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  border-radius: 16px 16px 0 0;
+}
+.study-detail-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--white); letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin: 1.5rem 0; }
+.detail-item label { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; display: block; margin-bottom: 0.2rem; }
+.detail-item span { font-size: 0.9rem; color: var(--white); }
+.progress-bar { width: 100%; height: 4px; background: var(--surface2); border-radius: 2px; margin-top: 0.3rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s ease; }
+textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-family: 'Noto Sans KR', sans-serif;
+  resize: vertical;
+  min-height: 80px;
+  outline: none;
+}
+textarea:focus { border-color: var(--accent); }
+
+/* ── RESPONSIVE ──────────────────────────────── */
+@media (max-width: 768px) {
+  nav { padding: 1rem 1.2rem; }
+  .nav-links { display: none; }
+  .hero-stats { gap: 1.5rem; }
+  section { padding: 4rem 1.2rem; }
+  .about-grid { grid-template-columns: 1fr; }
+  .study-card { grid-template-columns: auto 1fr; }
+  .study-meta { display: none; }
+  footer { padding: 2rem 1.2rem; }
+}
+
+/* ── CUSTOM CURSOR ───────────────────────────── */
+.cursor {
+  position: fixed;
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.1s;
+  mix-blend-mode: screen;
+}
+.cursor-ring {
+  position: fixed;
+  width: 32px; height: 32px;
+  border: 1px solid rgba(0,212,255,0.4);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transition: transform 0.12s, width 0.2s, height 0.2s;
+}
+
+/* ── COLOR THEME GRADIENT LINES ──────────────── */
+.gradient-line {
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
+  opacity: 0.3;
+}
+</style>
+</head>
+<body>
+
+<!-- 커서 이펙트 -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- 관리자 배너 (로그인 상태 예시) -->
+<div class="admin-banner" id="adminBanner" style="display:none">
+  <div class="admin-dot"></div>
+  관리자 모드로 접속 중 · 사이트 설정 변경 및 회원 관리 가능
+  <a href="#" style="color:rgba(123,97,255,0.9);margin-left:0.5rem;font-weight:600" onclick="openAdmin()">관리자 패널 →</a>
+</div>
+
+<!-- 네비게이션 -->
+<nav id="mainNav">
+  <a href="#" class="nav-logo">
+    <span class="dot"></span>
+    CAGI
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">동아리 소개</a></li>
+    <li><a href="#portfolio">포트폴리오</a></li>
+    <li><a href="#studies">스터디</a></li>
+    <li><a href="#" onclick="openStudyApply()">스터디 신청</a></li>
+  </ul>
+  <div style="display:flex;gap:0.5rem">
+    <button class="nav-btn" onclick="openModal('login')" id="loginBtn">로그인</button>
+    <button class="nav-btn filled" onclick="openModal('signup')" id="signupBtn">회원가입</button>
+    <button class="nav-btn" onclick="handleLogout()" id="logoutBtn" style="display:none">로그아웃</button>
+  </div>
+</nav>
+
+<!-- 히어로 섹션 -->
+<section id="hero">
+  <div class="hero-canvas"></div>
+  <div class="hero-grid"></div>
+  <canvas id="particleCanvas"></canvas>
+  
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="line"></span>
+      Since 1991 · 단국대학교 중앙동아리
+      <span class="line"></span>
+    </div>
+    <h1 class="hero-title">
+      C<span class="accent">A</span>GI
+    </h1>
+    <p class="hero-subtitle">Computer Art & Graphic Institute</p>
+    <p class="hero-desc">
+      단국대학교 유일무이 컴퓨터그래픽 동아리.<br/>
+      Blender, Unity, 프로그래밍으로 창의성을 현실로.
+    </p>
+    <div class="hero-actions">
+      <a href="#portfolio" class="btn-primary">포트폴리오 보기</a>
+      <a href="#" class="btn-ghost" onclick="openModal('signup'); return false">동아리 가입하기</a>
+    </div>
+  </div>
+  
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-num" data-count="33">0</span><span class="stat-label">Years</span></div>
+    <div class="stat"><span class="stat-num" data-count="500">0</span><span class="stat-label">Alumni</span></div>
+    <div class="stat"><span class="stat-num" data-count="120">0</span><span class="stat-label">Projects</span></div>
+  </div>
+  
+  <div class="scroll-hint">
+    <span>SCROLL</span>
+    <span class="arrow">↓</span>
+  </div>
+</section>
+
+<div class="gradient-line"></div>
+
+<!-- 소개 섹션 -->
+<div id="about">
+<section style="max-width:1200px;margin:0 auto;padding:6rem 2.5rem">
+  <div class="about-grid">
+    <div class="about-image">
+      <div class="about-image-inner">CAGI</div>
+      <div class="about-image-badge">
+        <div class="year">Founded · 1991</div>
+        <div class="text">단국대학교 중앙동아리</div>
+      </div>
+    </div>
+    <div>
+      <p class="section-label">About CAGI</p>
+      <h2 class="section-title">창의성의<br>무한한 가능성</h2>
+      <p style="color:var(--muted);line-height:1.9;margin:1rem 0 1.5rem">
+        1991년에 창설되어 30년 넘게 이어져 온 단국대학교 유일무이의 컴퓨터그래픽 동아리입니다.
+        Blender 3D, Unity 게임 엔진, 프로그래밍 등 다양한 분야의 스터디를 통해
+        서로의 성장을 이끌어가고 있습니다.
+      </p>
+      <p style="color:var(--muted);line-height:1.9;margin-bottom:1.5rem">
+        동아리원들이 직접 만든 포트폴리오를 공유하고, 함께 배우며 성장하는 공간을 지향합니다.
+        학년과 전공에 관계없이 컴퓨터 그래픽에 관심 있는 누구나 환영합니다.
+      </p>
+      <div class="about-pills">
+        <span class="pill highlight">Blender 3D</span>
+        <span class="pill highlight">Unity</span>
+        <span class="pill highlight">프로그래밍</span>
+        <span class="pill">게임 개발</span>
+        <span class="pill">모션 그래픽</span>
+        <span class="pill">디지털 아트</span>
+        <span class="pill">VR/AR</span>
+        <span class="pill">쉐이더</span>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+
+<div class="gradient-line"></div>
+
+<!-- 포트폴리오 섹션 -->
+<section id="portfolio">
+  <p class="section-label">Portfolio</p>
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem">
+    <div>
+      <h2 class="section-title">작품 갤러리</h2>
+      <p class="section-subtitle">CAGI 멤버들이 만들어낸 창의적인 작품들을 만나보세요.</p>
+    </div>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+      <button class="pill" style="cursor:pointer;transition:all 0.2s" onclick="filterPortfolio('all')">전체</button>
+      <button class="pill" style="cursor:pointer" onclick="filterPortfolio('3D')">3D</button>
+      <button class="pill" style="cursor:pointer" onclick="filterPortfolio('게임')">게임</button>
+      <button class="pill" style="cursor:pointer" onclick="filterPortfolio('프로그래밍')">프로그래밍</button>
+    </div>
+  </div>
+  
+  <div class="portfolio-grid" id="portfolioGrid">
+    <!-- JS로 렌더링 -->
+  </div>
+  
+  <div style="text-align:center;margin-top:2.5rem">
+    <button class="btn-ghost" onclick="openModal('login')">더 많은 작품 보기 (로그인 필요)</button>
+  </div>
+</section>
+
+<div class="gradient-line"></div>
+
+<!-- 스터디 섹션 -->
+<section id="studies">
+  <p class="section-label">Studies</p>
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:0">
+    <div>
+      <h2 class="section-title">스터디 모집</h2>
+      <p class="section-subtitle">현재 모집 중인 스터디에 참여해보세요.</p>
+    </div>
+  </div>
+  
+  <div class="study-list" id="studyList">
+    <!-- JS로 렌더링 -->
+  </div>
+</section>
+
+<div class="gradient-line"></div>
+
+<!-- 푸터 -->
+<footer>
+  <div class="footer-logo">CAGI</div>
+  <div class="footer-sub">Computer Art & Graphic Institute · 단국대학교</div>
+  <div class="footer-links">
+    <a href="#">소개</a>
+    <a href="#">포트폴리오</a>
+    <a href="#">스터디</a>
+    <a href="#">개인정보처리방침</a>
+    <a href="#">문의</a>
+  </div>
+  <div class="footer-copy">© 2024 CAGI. All rights reserved. Est. 1991.</div>
+</footer>
+
+<!-- ──────────────── MODALS ──────────────────── -->
+
+<!-- 로그인/회원가입 모달 -->
+<div class="modal-overlay" id="authModal" onclick="closeAuthModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle">로그인</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-top:0.2rem;font-family:'Space Grotesk',sans-serif">CAGI Member Portal</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tabs">
+        <button class="modal-tab active" onclick="switchTab('login')">로그인</button>
+        <button class="modal-tab" onclick="switchTab('signup')">회원가입</button>
+      </div>
+      
+      <!-- 로그인 폼 -->
+      <div id="loginForm">
+        <div class="form-group">
+          <label>이메일</label>
+          <input type="email" placeholder="example@dankook.ac.kr" id="loginEmail"/>
+        </div>
+        <div class="form-group">
+          <label>비밀번호</label>
+          <input type="password" placeholder="••••••••" id="loginPassword"/>
+        </div>
+        <button class="form-btn" onclick="handleLogin()">로그인</button>
+        <div class="form-divider">또는</div>
+        <button class="form-btn" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)" onclick="handleDemoLogin()">
+          🎭 데모 계정으로 체험하기
+        </button>
+      </div>
+      
+      <!-- 회원가입 폼 -->
+      <div id="signupForm" style="display:none">
+        <div class="form-group">
+          <label>이름</label>
+          <input type="text" placeholder="홍길동" id="regName"/>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>학번</label>
+            <input type="text" placeholder="32200000" id="regStudentId"/>
+          </div>
+          <div class="form-group">
+            <label>학년</label>
+            <select id="regGrade">
+              <option value="">선택</option>
+              <option>1학년</option><option>2학년</option>
+              <option>3학년</option><option>4학년</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>전공</label>
+          <input type="text" placeholder="컴퓨터학과" id="regMajor"/>
+        </div>
+        <div class="form-group">
+          <label>생년월일</label>
+          <input type="date" id="regBirth"/>
+        </div>
+        <div class="form-group">
+          <label>성별</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="gender" value="남">남</label>
+            <label class="radio-label"><input type="radio" name="gender" value="여">여</label>
+            <label class="radio-label"><input type="radio" name="gender" value="기타">기타</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>재학 상태</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="status" value="재학생" checked>재학생</label>
+            <label class="radio-label"><input type="radio" name="status" value="졸업생">졸업생</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>이메일</label>
+          <input type="email" placeholder="example@dankook.ac.kr" id="regEmail"/>
+        </div>
+        <div class="form-group">
+          <label>비밀번호</label>
+          <input type="password" placeholder="8자 이상" id="regPassword"/>
+        </div>
+        <label class="checkbox-label">
+          <input type="checkbox" id="agreeTerms"/>
+          <a href="#">이용약관</a> 및 <a href="#">개인정보처리방침</a>에 동의합니다
+        </label>
+        <button class="form-btn" style="margin-top:1rem" onclick="handleSignup()">가입하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 스터디 신청 모달 -->
+<div class="modal-overlay" id="studyModal" onclick="closeStudyModal(event)">
+  <div class="modal study-detail">
+    <div class="detail-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:0.7rem;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;margin-bottom:0.4rem" id="sdCategory">Blender</div>
+          <div class="study-detail-title" id="sdTitle">스터디 제목</div>
+        </div>
+        <button class="modal-close" onclick="closeStudyModalDirect()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--muted);font-size:0.88rem;line-height:1.8;margin-bottom:1.5rem" id="sdDesc"></p>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <label>일정</label>
+          <span id="sdSchedule"></span>
+        </div>
+        <div class="detail-item">
+          <label>장소</label>
+          <span id="sdLocation"></span>
+        </div>
+        <div class="detail-item">
+          <label>기간</label>
+          <span id="sdDuration"></span>
+        </div>
+        <div class="detail-item">
+          <label>신청 마감</label>
+          <span id="sdDeadline"></span>
+        </div>
+      </div>
+      <div style="margin-bottom:1.5rem">
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem">
+          <span style="font-size:0.78rem;color:var(--muted);font-family:'Space Grotesk',sans-serif">모집 현황</span>
+          <span style="font-size:0.78rem;color:var(--accent);font-family:'Space Grotesk',sans-serif" id="sdCount"></span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="sdProgress" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>신청 동기 (선택)</label>
+        <textarea placeholder="스터디에 참여하고 싶은 이유를 간단히 적어주세요." id="sdMotivation"></textarea>
+      </div>
+      <button class="form-btn" onclick="handleStudyApply()" id="applyBtn">스터디 신청하기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── 데이터 ─────────────────────────────────────
+const PORTFOLIOS = [
+  { id:1, title:'사막 환경 씬', author:'김민준', category:'3D', tools:['Blender','Substance Painter'], likes:42, color:'#FF6B35' },
+  { id:2, title:'인디 게임 프로토타입', author:'이수빈', category:'게임', tools:['Unity','C#'], likes:38, color:'#7B61FF' },
+  { id:3, title:'타이포그래피 모션', author:'박지호', category:'프로그래밍', tools:['After Effects','JavaScript'], likes:29, color:'#00D4FF' },
+  { id:4, title:'로봇 캐릭터 모델링', author:'최다연', category:'3D', tools:['Blender','ZBrush'], likes:55, color:'#FF6B6B' },
+  { id:5, title:'슈팅게임 데모', author:'한승우', category:'게임', tools:['Unity','Shader Graph'], likes:33, color:'#4CAF50' },
+  { id:6, title:'파티클 시스템 시뮬', author:'정예린', category:'프로그래밍', tools:['Three.js','GLSL'], likes:47, color:'#FFD700' },
+]
+
+const STUDIES = [
+  { id:1, title:'Blender 기초 스터디', category:'Blender', icon:'🧊', schedule:'매주 화요일 18:00', location:'공학관 301호', duration:'8주', deadline:'2024.12.31', max:12, current:7, desc:'Blender를 처음 접하는 분들을 위한 기초 스터디입니다. 모델링부터 렌더링까지 단계별로 배웁니다.' },
+  { id:2, title:'Unity 게임 개발', category:'Unity', icon:'🎮', schedule:'매주 목요일 18:00', location:'공학관 203호', duration:'10주', deadline:'2024.12.25', max:10, current:10, desc:'Unity를 활용한 2D/3D 게임 개발 스터디입니다. 간단한 게임을 직접 만들어봅니다.' },
+  { id:3, title:'웹 프론트엔드 스터디', category:'프로그래밍', icon:'💻', schedule:'매주 수요일 19:00', location:'온라인(Discord)', duration:'6주', deadline:'2025.01.10', max:15, current:4, desc:'React와 TypeScript를 활용한 모던 웹 개발 스터디입니다.' },
+  { id:4, title:'쉐이더 아트 워크샵', category:'기타', icon:'✨', schedule:'격주 토요일 14:00', location:'공학관 B101', duration:'4회', deadline:'2025.01.05', max:8, current:3, desc:'GLSL과 Shader Graph를 활용한 쉐이더 아트 워크샵입니다.' },
+]
+
+// ── 상태 ─────────────────────────────────────
+let isLoggedIn = false
+let isAdmin = false
+let currentStudy = null
+
+// ── 렌더링 ───────────────────────────────────
+function renderPortfolios(filter = 'all') {
+  const grid = document.getElementById('portfolioGrid')
+  const items = filter === 'all' ? PORTFOLIOS : PORTFOLIOS.filter(p => p.category === filter)
+  grid.innerHTML = items.map(p => `
+    <div class="portfolio-card" onclick="viewPortfolio(${p.id})">
+      <div class="portfolio-thumb">
+        <div class="portfolio-thumb-placeholder" style="color:${p.color}20">${p.category}</div>
+        <div style="position:absolute;inset:0;background:linear-gradient(135deg,${p.color}15 0%,transparent 60%)"></div>
+        <div class="portfolio-overlay">
+          <span class="portfolio-tag">${p.category}</span>
+        </div>
+      </div>
+      <div class="portfolio-info">
+        <div class="portfolio-meta">
+          <span class="portfolio-author">by ${p.author}</span>
+          <span class="portfolio-likes">♡ ${p.likes}</span>
+        </div>
+        <div class="portfolio-title">${p.title}</div>
+        <div class="portfolio-tools">
+          ${p.tools.map(t => `<span class="tool-badge">${t}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('')
+}
+
+function renderStudies() {
+  const list = document.getElementById('studyList')
+  list.innerHTML = STUDIES.map(s => `
+    <div class="study-card" onclick="openStudyDetail(${s.id})">
+      <div class="study-icon">${s.icon}</div>
+      <div class="study-info">
+        <h3>${s.title}</h3>
+        <p>${s.schedule} · ${s.location}</p>
+      </div>
+      <div class="study-meta">
+        <span class="study-status ${s.current >= s.max ? 'closed' : 'open'}">${s.current >= s.max ? '마감' : '모집중'}</span>
+        <span class="study-count">${s.current}/${s.max}명</span>
+      </div>
+    </div>
+  `).join('')
+}
+
+// ── 이벤트 핸들러 ────────────────────────────
+function filterPortfolio(cat) {
+  document.querySelectorAll('.portfolio ~ div button, #portfolio .pill').forEach(b => b.classList.remove('highlight'))
+  renderPortfolios(cat)
+}
+
+function viewPortfolio(id) {
+  if (!isLoggedIn) {
+    openModal('login')
+    return
+  }
+  const p = PORTFOLIOS.find(x => x.id === id)
+  if (p) alert(`"${p.title}"\n작가: ${p.author}\n사용 툴: ${p.tools.join(', ')}\n\n(실제 서비스에서는 상세 페이지로 이동합니다)`)
+}
+
+function openStudyDetail(id) {
+  currentStudy = STUDIES.find(s => s.id === id)
+  if (!currentStudy) return
+  const s = currentStudy
+  document.getElementById('sdCategory').textContent = s.category
+  document.getElementById('sdTitle').textContent = s.title
+  document.getElementById('sdDesc').textContent = s.desc
+  document.getElementById('sdSchedule').textContent = s.schedule
+  document.getElementById('sdLocation').textContent = s.location
+  document.getElementById('sdDuration').textContent = s.duration
+  document.getElementById('sdDeadline').textContent = s.deadline
+  document.getElementById('sdCount').textContent = `${s.current}/${s.max}명`
+  document.getElementById('sdProgress').style.width = `${(s.current/s.max)*100}%`
+  const btn = document.getElementById('applyBtn')
+  if (s.current >= s.max) {
+    btn.textContent = '모집이 마감되었습니다'
+    btn.disabled = true
+    btn.style.opacity = '0.4'
+  } else {
+    btn.textContent = '스터디 신청하기'
+    btn.disabled = false
+    btn.style.opacity = '1'
+  }
+  document.getElementById('studyModal').classList.add('active')
+}
+
+function handleStudyApply() {
+  if (!isLoggedIn) {
+    closeStudyModalDirect()
+    openModal('login')
+    return
+  }
+  const motivation = document.getElementById('sdMotivation').value
+  alert(`"${currentStudy.title}" 스터디 신청이 완료되었습니다!\n\n관리자 검토 후 개별 연락드립니다.`)
+  closeStudyModalDirect()
+}
+
+function openStudyApply() { openStudyDetail(1) }
+
+// ── 모달 제어 ────────────────────────────────
+function openModal(tab = 'login') {
+  document.getElementById('authModal').classList.add('active')
+  switchTab(tab)
+}
+function closeModal() { document.getElementById('authModal').classList.remove('active') }
+function closeAuthModal(e) { if (e.target === e.currentTarget) closeModal() }
+function closeStudyModalDirect() { document.getElementById('studyModal').classList.remove('active') }
+function closeStudyModal(e) { if (e.target === e.currentTarget) closeStudyModalDirect() }
+
+function switchTab(tab) {
+  document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none'
+  document.getElementById('signupForm').style.display = tab === 'signup' ? 'block' : 'none'
+  document.getElementById('modalTitle').textContent = tab === 'login' ? '로그인' : '회원가입'
+  document.querySelectorAll('.modal-tab').forEach((t, i) => {
+    t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'signup'))
+  })
+}
+
+// ── 인증 (데모) ──────────────────────────────
+function handleLogin() {
+  const email = document.getElementById('loginEmail').value
+  const pw = document.getElementById('loginPassword').value
+  if (!email || !pw) { alert('이메일과 비밀번호를 입력하세요.'); return }
+  loginSuccess(false)
+}
+
+function handleDemoLogin() {
+  loginSuccess(false)
+}
+
+function loginSuccess(admin) {
+  isLoggedIn = true; isAdmin = admin
+  document.getElementById('loginBtn').style.display = 'none'
+  document.getElementById('signupBtn').style.display = 'none'
+  document.getElementById('logoutBtn').style.display = 'block'
+  if (admin) document.getElementById('adminBanner').style.display = 'flex'
+  closeModal()
+  alert('✓ 로그인되었습니다!\n\n이제 포트폴리오 상세보기와 스터디 신청이 가능합니다.')
+}
+
+function handleLogout() {
+  isLoggedIn = false; isAdmin = false
+  document.getElementById('loginBtn').style.display = 'block'
+  document.getElementById('signupBtn').style.display = 'block'
+  document.getElementById('logoutBtn').style.display = 'none'
+  document.getElementById('adminBanner').style.display = 'none'
+}
+
+function handleSignup() {
+  const name = document.getElementById('regName').value
+  const sid = document.getElementById('regStudentId').value
+  const major = document.getElementById('regMajor').value
+  const email = document.getElementById('regEmail').value
+  const pw = document.getElementById('regPassword').value
+  const agree = document.getElementById('agreeTerms').checked
+  if (!name||!sid||!major||!email||!pw) { alert('모든 필수 항목을 입력해주세요.'); return }
+  if (!agree) { alert('이용약관에 동의해주세요.'); return }
+  alert(`✓ "${name}"님, 회원가입이 완료되었습니다!\n이메일 인증 후 서비스를 이용하실 수 있습니다.`)
+  switchTab('login')
+}
+
+function openAdmin() {
+  alert('관리자 패널\n\n현재 관리 가능한 기능:\n• 사이트 히어로 영상/이미지 변경\n• 회원 목록 및 권한 관리\n• 스터디 생성/수정/마감\n• 관리자 권한 양도\n• 공지사항 설정\n\n(실제 서비스에서는 전용 관리자 페이지로 이동합니다)')
+}
+
+// ── 파티클 애니메이션 ─────────────────────────
+const canvas = document.getElementById('particleCanvas')
+const ctx = canvas.getContext('2d')
+let particles = []
+let animFrame
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight
+}
+
+class Particle {
+  constructor() { this.reset() }
+  reset() {
+    this.x = Math.random() * canvas.width
+    this.y = Math.random() * canvas.height
+    this.size = Math.random() * 1.5 + 0.3
+    this.speedX = (Math.random() - 0.5) * 0.3
+    this.speedY = (Math.random() - 0.5) * 0.3
+    this.opacity = Math.random() * 0.5 + 0.1
+    this.color = Math.random() > 0.7 ? '#00D4FF' : Math.random() > 0.5 ? '#7B61FF' : '#ffffff'
+  }
+  update() {
+    this.x += this.speedX; this.y += this.speedY
+    if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset()
+  }
+  draw() {
+    ctx.globalAlpha = this.opacity
+    ctx.fillStyle = this.color
+    ctx.beginPath()
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
+    ctx.fill()
+  }
+}
+
+function initParticles() {
+  particles = Array.from({ length: 80 }, () => new Particle())
+}
+
+function drawConnections() {
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x
+      const dy = particles[i].y - particles[j].y
+      const dist = Math.sqrt(dx*dx + dy*dy)
+      if (dist < 100) {
+        ctx.globalAlpha = (1 - dist/100) * 0.08
+        ctx.strokeStyle = '#00D4FF'
+        ctx.lineWidth = 0.5
+        ctx.beginPath()
+        ctx.moveTo(particles[i].x, particles[i].y)
+        ctx.lineTo(particles[j].x, particles[j].y)
+        ctx.stroke()
+      }
+    }
+  }
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  particles.forEach(p => { p.update(); p.draw() })
+  drawConnections()
+  ctx.globalAlpha = 1
+  animFrame = requestAnimationFrame(animate)
+}
+
+resizeCanvas(); initParticles(); animate()
+window.addEventListener('resize', () => { resizeCanvas(); initParticles() })
+
+// ── 숫자 카운트업 ─────────────────────────────
+function countUp(el, target, duration = 1800) {
+  let start = 0
+  const step = () => {
+    start += target / (duration / 16)
+    el.textContent = Math.min(Math.floor(start), target) + (target >= 100 ? '+' : '')
+    if (start < target) requestAnimationFrame(step)
+    else el.textContent = target + (target >= 100 ? '+' : '')
+  }
+  requestAnimationFrame(step)
+}
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      document.querySelectorAll('[data-count]').forEach(el => {
+        countUp(el, parseInt(el.dataset.count))
+      })
+      observer.disconnect()
+    }
+  })
+}, { threshold: 0.5 })
+
+const heroStats = document.querySelector('.hero-stats')
+if (heroStats) observer.observe(heroStats)
+
+// ── 커스텀 커서 ───────────────────────────────
+const cursor = document.getElementById('cursor')
+const ring = document.getElementById('cursorRing')
+let mx = 0, my = 0, rx = 0, ry = 0
+
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY })
+
+function updateCursor() {
+  cursor.style.transform = `translate(${mx - 4}px, ${my - 4}px)`
+  rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12
+  ring.style.transform = `translate(${rx - 16}px, ${ry - 16}px)`
+  requestAnimationFrame(updateCursor)
+}
+updateCursor()
+
+document.querySelectorAll('button, a, .portfolio-card, .study-card').forEach(el => {
+  el.addEventListener('mouseenter', () => { cursor.style.transform += ' scale(2)'; ring.style.width = '48px'; ring.style.height = '48px' })
+  el.addEventListener('mouseleave', () => { ring.style.width = '32px'; ring.style.height = '32px' })
+})
+
+// ── 초기 렌더 ────────────────────────────────
+renderPortfolios()
+renderStudies()
+</script>
+</body>
+</html>

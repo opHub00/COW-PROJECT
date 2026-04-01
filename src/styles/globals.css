@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #080A0F;
+  --surface: #0D1117;
+  --surface2: #161B24;
+  --border: rgba(255,255,255,0.07);
+  --accent: #00D4FF;
+  --accent2: #7B61FF;
+  --accent3: #FF6B6B;
+  --text: #E8EAF0;
+  --muted: #6B7280;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans KR', sans-serif;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* 스크롤바 */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+/* 폰트 */
+.font-display { font-family: 'Bebas Neue', sans-serif; }
+.font-mono-ui  { font-family: 'Space Grotesk', sans-serif; }
+
+/* 유틸리티 */
+.gradient-line {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
+  opacity: 0.3;
+}
+
+/* 섹션 공통 */
+.section-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.section-label::before {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: var(--accent);
+}
+
+/* 버튼 기본 리셋 */
+button { cursor: pointer; }
+
+/* 입력 필드 공통 */
+.input-base {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.65rem 0.9rem;
+  color: var(--text);
+  font-size: 0.88rem;
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: border-color 0.2s;
+  outline: none;
+}
+.input-base:focus { border-color: var(--accent); }
+.input-base::placeholder { color: var(--muted); }
+
+/* 애니메이션 */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.8); }
+}
+@keyframes bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%       { transform: translateX(-50%) translateY(-6px); }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.animate-fadeInUp { animation: fadeInUp 0.7s ease both; }
+.animate-fadeIn   { animation: fadeIn 0.4s ease both; }
+.animate-pulse-dot { animation: pulse 2s infinite; }
+.animate-spin     { animation: spin 0.8s linear infinite; }
+
+/* 딜레이 유틸 */
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
