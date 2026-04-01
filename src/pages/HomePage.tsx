@@ -15,7 +15,7 @@ export default function HomePage() {
       if (cfg) setHeroConfig(cfg.value)
     })
     supabase.from('studies').select('*').eq('status','open').limit(4).order('created_at',{ascending:false}).then(({ data }) => { if (data) setStudies(data) })
-    supabase.from('portfolios').select('*, profiles(name, avatar_url)').eq('is_public',true).limit(6).order('created_at',{ascending:false}).then(({ data }) => { if (data) setPortfolios(data) })
+    supabase.from('portfolios').select('*, profiles!user_id(name, avatar_url)').eq('is_public',true).limit(6).order('created_at',{ascending:false}).then(({ data }) => { if (data) setPortfolios(data) })
   }, [])
 
   // 파티클 애니메이션
