@@ -18,7 +18,7 @@ export default function PortfolioPage() {
 
   const fetchPortfolios = async () => {
     setLoading(true)
-    let q = supabase.from('portfolios').select('*, profiles(name, avatar_url)').eq('is_public', true).order('created_at', { ascending: false })
+    let q = supabase.from('portfolios').select('*, profiles!user_id(name, avatar_url)').eq('is_public', true).order('created_at', { ascending: false })
     if (category !== '전체') q = q.eq('category', category)
     const { data } = await q
     setPortfolios(data ?? [])
