@@ -164,8 +164,8 @@ export default function HomePage() {
 
         {/* 통계 */}
         <div className="animate-fadeInUp delay-500" style={{
-          display:'flex', gap:'3rem', justifyContent:'center',
-          marginTop:'2.5rem',
+          display:'flex', gap:'3rem', justifyContent:'center', width:'100%',
+          marginTop:'3rem', paddingLeft:'0',
         }}>
           {[['33','Years'],['500','Alumni'],['120','Projects']].map(([n, l]) => (
             <div key={l} style={{ textAlign:'center' }}>
