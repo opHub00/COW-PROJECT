@@ -14,7 +14,7 @@ export default function PortfolioDetailPage() {
 
   useEffect(() => {
     if (!id) return
-    supabase.from('portfolios').select('*, profiles(name, avatar_url, major, grade)').eq('id', id).single().then(({ data }) => {
+    supabase.from('portfolios').select('*, profiles!user_id(name, avatar_url, major, grade)').eq('id', id).single().then(({ data }) => {
       setPortfolio(data)
       setLoading(false)
       // 조회수 증가
