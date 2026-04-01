@@ -92,7 +92,7 @@ export default function HomePage() {
   return (
     <main>
       {/* ── HERO ──────────────────────────────── */}
-      <section id="hero" style={{ position:'relative', minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden' }}>
+      <section id="hero" style={{ position:'relative', minHeight:'100vh', display:'flex', alignItems:'flex-start', justifyContent:'center', overflow:'hidden', paddingTop:'20vh' }}>
         {/* 배경 */}
         <div style={{
           position:'absolute', inset:0,
@@ -164,8 +164,8 @@ export default function HomePage() {
 
         {/* 통계 */}
         <div className="animate-fadeInUp delay-500" style={{
-          position:'absolute', bottom:'3rem', left:'50%', transform:'translateX(-50%)',
-          display:'flex', gap:'3rem',
+          display:'flex', gap:'3rem', justifyContent:'center',
+          marginTop:'2.5rem',
         }}>
           {[['33','Years'],['500','Alumni'],['120','Projects']].map(([n, l]) => (
             <div key={l} style={{ textAlign:'center' }}>
@@ -176,9 +176,10 @@ export default function HomePage() {
         </div>
 
         {/* 스크롤 힌트 */}
-        <div style={{ position:'absolute', bottom:'1.2rem', left:'50%', display:'flex', flexDirection:'column', alignItems:'center', gap:'.3rem', color:'var(--muted)', fontSize:'.7rem', fontFamily:"'Space Grotesk',sans-serif", letterSpacing:'.15em', animation:'bounce 2s infinite' }}>
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'.3rem', color:'var(--muted)', fontSize:'.7rem', fontFamily:"'Space Grotesk',sans-serif", letterSpacing:'.15em', animation:'bounce 2s infinite', marginTop:'1.5rem' }}>
           SCROLL ↓
         </div>
+      </div>
       </section>
 
       <div className="gradient-line"/>
